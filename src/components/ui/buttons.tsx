@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const CTAButton = ({
   title,
@@ -21,5 +24,30 @@ export const CTAButton = ({
         </button>
       )}
     </>
+  );
+};
+
+export const GoBackButton = () => {
+  const router = useRouter();
+
+  return (
+    <button
+      onClick={() => router.back()}
+      className="cursor-pointer duration-200 hover:scale-125 active:scale-100"
+      title="Go Back"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        className="stroke-blue-500 w-10 h-10"
+      >
+        <path
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          stroke-width="1.5"
+          d="M11 6L5 12M5 12L11 18M5 12H19"
+        ></path>
+      </svg>
+    </button>
   );
 };
