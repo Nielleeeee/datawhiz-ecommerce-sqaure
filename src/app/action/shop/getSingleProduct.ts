@@ -14,8 +14,6 @@ export const getSingleProduct = async ({
       type: "permalink",
     });
 
-    console.log(product);
-
     return { status: true, error: false, data: product };
   } catch (error) {
     return { status: false, error: error as any };
