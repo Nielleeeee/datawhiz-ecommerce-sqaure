@@ -4,7 +4,7 @@ import { Product } from "@chec/commerce.js/types/product";
 
 export default function ProductCard(product: Product) {
   return (
-    <Link href="/" className="group relative block overflow-hidden rounded-lg">
+    <Link href={`/shop/${product.permalink}`} className="group relative block overflow-hidden rounded-lg">
       <Image
         src={product.image?.url ?? ""}
         alt="some image"
