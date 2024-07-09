@@ -1,10 +1,26 @@
+"use client";
+
+import { MouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@chec/commerce.js/types/product";
+import { useCart } from "@/lib/cartContext";
 
 export default function ProductCard(product: Product) {
+  const { addToCart } = useCart();
+
+  const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const response = await addToCart(product.id, 1);
+    console.log(response);
+  };
+
   return (
-    <Link href={`/shop/${product.permalink}`} className="group relative block overflow-hidden rounded-lg">
+    <Link
+      href={`/shop/${product.permalink}`}
+      className="group relative block overflow-hidden rounded-lg"
+    >
       <Image
         src={product.image?.url ?? ""}
         alt="some image"
@@ -28,7 +44,10 @@ export default function ProductCard(product: Product) {
         </p>
 
         <form className="mt-4">
-          <button className="block w-full rounded bg-blue-500 text-white p-4 text-sm font-medium transition hover:scale-105">
+          <button
+            onClick={handleAddToCartClick}
+            className="block w-full rounded bg-blue-500 text-white p-4 text-sm font-medium transition hover:scale-105"
+          >
             Add to Cart
           </button>
         </form>
