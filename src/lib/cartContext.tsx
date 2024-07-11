@@ -3,14 +3,10 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import Commerce from "@chec/commerce.js";
 import { Cart } from "@chec/commerce.js/types/cart";
-import { AddUpdateResponse } from "@chec/commerce.js/features/cart";
 
 interface CartContextType {
   cart: Cart | null;
-  addToCart: (
-    productId: string,
-    quantity: number
-  ) => Promise<AddUpdateResponse>;
+  addToCart: (productId: string, quantity: number) => Promise<Cart>;
 }
 
 const commerce = new Commerce(`${process.env.NEXT_PUBLIC_CHEC_PUBLIC_API_KEY}`);
@@ -30,9 +26,20 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const addToCart = async (productID: string, quantity: number) => {
-    const response = await commerce.cart.add(productID, quantity);
-    setCart(response.cart);
-    return response;
+    try {
+      const response: any = await commerce.cart.add(productID, quantity);
+
+      if (response.error) {
+        console.log("invalid add to cart");
+        throw new Error("Failed to add item to cart");
+      }
+
+      setCart(response);
+      return response;
+    } catch (error) {
+      console.error("Error Adding to cart: ", error);
+      throw error;
+    }
   };
 
   return (
