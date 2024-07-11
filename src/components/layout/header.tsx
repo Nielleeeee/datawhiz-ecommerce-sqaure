@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useCart } from "@/lib/cartContext";
 
 const navigationList = [
   { label: "Home", path: "/" },
@@ -11,6 +12,7 @@ const navigationList = [
 ];
 
 export default function Header() {
+  const { cart } = useCart();
   const [isOpen, setIsOpen] = useState(false);
 
   const pathname = usePathname();
@@ -73,10 +75,10 @@ export default function Header() {
 
               <Link
                 className="relative text-gray-700 transition-colors duration-300 transform  hover:text-gray-600"
-                href="#"
+                href="/cart"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-8 h-8"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +92,13 @@ export default function Header() {
                   />
                 </svg>
 
-                <span className="absolute top-0 left-0 p-1 text-xs text-white bg-blue-500 rounded-full"></span>
+                {cart &&
+                  cart.total_unique_items !== undefined &&
+                  cart.total_unique_items > 0 && (
+                    <span className="absolute -top-2 -left-4 px-2 py-1 text-xs text-white bg-blue-500 rounded-full">
+                      {cart.total_unique_items}
+                    </span>
+                  )}
               </Link>
             </div>
 
