@@ -1,19 +1,35 @@
 "use client";
 
-import { MouseEvent } from "react";
+import { MouseEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@chec/commerce.js/types/product";
 import { useCart } from "@/lib/cartContext";
+import { toast } from "react-toastify";
 
 export default function ProductCard(product: Product) {
   const { addToCart } = useCart();
+  const [loading, setLoading] = useState(false);
 
   const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     event.preventDefault();
-    const response = await addToCart(product.id, 1);
-    console.log(response);
+
+    try {
+      setLoading(true);
+
+      const response = addToCart(product.id, 1);
+
+      await toast
+        .promise(response, {
+          pending: "Adding to Cart... 🙄",
+          success: "Item Added to Cart. 👌",
+          error: "Something went wrong. 😱",
+        })
+        .then(() => setLoading(false));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -46,7 +62,8 @@ export default function ProductCard(product: Product) {
         <form className="mt-4">
           <button
             onClick={handleAddToCartClick}
-            className="block w-full rounded bg-blue-500 text-white p-4 text-sm font-medium transition hover:scale-105"
+            disabled={loading}
+            className="block w-full rounded bg-blue-500 disabled:bg-gray-500 text-white p-4 text-sm font-medium transition hover:scale-105"
           >
             Add to Cart
           </button>
