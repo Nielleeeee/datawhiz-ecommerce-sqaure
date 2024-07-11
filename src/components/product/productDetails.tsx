@@ -6,13 +6,19 @@ import parse from "html-react-parser";
 import { useCart } from "@/lib/cartContext";
 import { useState } from "react";
 import { Minus, Add, Cart, Heart } from "@/components/ui/svg";
+import { toast } from "react-toastify";
 
 export default function ProductDetails(productData: Product) {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const addQuantity = () => {
-    setQuantity(quantity < productData.inventory.available ? quantity + 1 : productData.inventory.available);
+    setQuantity(
+      quantity < productData.inventory.available
+        ? quantity + 1
+        : productData.inventory.available
+    );
   };
 
   const minusQuantity = () => {
@@ -31,11 +37,20 @@ export default function ProductDetails(productData: Product) {
   };
 
   const handleAddToCartClick = async () => {
-    if (quantity > 1 && quantity <= productData.inventory.available) {
-      const response = await addToCart(productData.id, quantity);
-      console.log(response);
-    } else {
-      alert(`Only ${productData.inventory.available} items are available`);
+    try {
+      if (quantity > 1 && quantity <= productData.inventory.available) {
+        const response = addToCart(productData.id, quantity);
+
+        await toast
+          .promise(response, {
+            pending: "Adding to Cart... 🙄",
+            success: "Item Added to Cart. 👌",
+            error: "Something went wrong. 😱",
+          })
+          .then(() => setLoading(false));
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -130,7 +145,8 @@ export default function ProductDetails(productData: Product) {
                 </div>
                 <button
                   onClick={handleAddToCartClick}
-                  className="group py-4 px-5 rounded-full bg-indigo-50 text-indigo-600 font-semibold text-lg w-full flex items-center justify-center gap-2 transition-all duration-500 hover:bg-indigo-100"
+                  disabled={loading}
+                  className="group py-4 px-5 rounded-full bg-indigo-200 disabled:bg-gray-200 text-indigo-600 font-semibold text-lg w-full flex items-center justify-center gap-2 transition-all duration-500 hover:bg-indigo-100"
                 >
                   <Cart />
                   Add to cart
