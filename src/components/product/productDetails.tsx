@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cartContext";
 import { useState } from "react";
 import { Minus, Add, Cart, Heart } from "@/components/ui/svg";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 export default function ProductDetails(productData: Product) {
   const { addToCart } = useCart();
@@ -39,6 +40,8 @@ export default function ProductDetails(productData: Product) {
   const handleAddToCartClick = async () => {
     try {
       if (quantity > 1 && quantity <= productData.inventory.available) {
+        setLoading(true);
+
         const response = addToCart(productData.id, quantity);
 
         await toast
@@ -47,7 +50,10 @@ export default function ProductDetails(productData: Product) {
             success: "Item Added to Cart. 👌",
             error: "Something went wrong. 😱",
           })
-          .then(() => setLoading(false));
+          .then(() => {
+            setLoading(false);
+            setQuantity(1);
+          });
       }
     } catch (error) {
       console.error(error);
@@ -156,9 +162,9 @@ export default function ProductDetails(productData: Product) {
                 <button className="group transition-all duration-500 p-4 rounded-full bg-indigo-50 hover:bg-indigo-100 hover:shadow-sm hover:shadow-indigo-300">
                   <Heart />
                 </button>
-                <button className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
+                <Link href={productData.checkout_url.checkout} className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
                   Buy Now
-                </button>
+                </Link>
               </div>
             </div>
           </div>
