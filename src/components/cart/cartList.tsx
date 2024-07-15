@@ -7,19 +7,11 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import TruckLoading from "@/components/loaders/truckLoading";
 import { ShopIllustration } from "@/components/ui/svg";
+import { useState } from "react";
 
 export default function CartItems() {
   const { cart, removeToCart, updateCart } = useCart();
-
-  const handleQuantityChange = async (lineID: string, quantity: number) => {
-    const response = updateCart(lineID, quantity);
-
-    await toast.promise(response, {
-      pending: "Updating Cart... 🙄",
-      success: "Cart Updated. 👌",
-      error: "Something went wrong. 😱",
-    });
-  };
+  const [quantity, setQuantity] = useState(0);
 
   const handleRemoveToCart = async (lineID: string) => {
     const response = removeToCart(lineID);
@@ -32,11 +24,22 @@ export default function CartItems() {
   };
 
   const LineItems = () => {
+
+    const handleQuantityChange = async (lineID: string, quantity: number) => {
+      const response = updateCart(lineID, quantity);
+
+      await toast.promise(response, {
+        pending: "Updating Cart... 🙄",
+        success: "Cart Updated. 👌",
+        error: "Something went wrong. 😱",
+      });
+    };
+
     if (cart && cart.line_items.length > 0) {
       return (
         <ul className="space-y-4">
           {cart.line_items.map((item: LineItem, index: number) => (
-            <li key={index} className="flex items-center gap-4">
+            <li key={index} className="flex items-center gap-2 sm:gap-4">
               <Image
                 src={`${item.image?.url}`}
                 alt={item.name}
@@ -59,19 +62,34 @@ export default function CartItems() {
               </div>
 
               <div className="flex flex-1 items-center justify-end gap-2">
-                <form>
-                  <label htmlFor={`quantity-${index}`} className="sr-only">
-                    {" "}
-                    Quantity{" "}
-                  </label>
+                <label htmlFor={`quantity-${index}`} className="sr-only">
+                  {" "}
+                  Quantity{" "}
+                </label>
+
+                <div className="flex items-center rounded border border-gray-200">
+                  <button
+                    type="button"
+                    className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75"
+                  >
+                    &minus;
+                  </button>
 
                   <input
                     type="number"
                     value={item.quantity}
                     id={`quantity-${index}`}
-                    className="remove-arrow h-8 w-12 rounded border-gray-200 bg-gray-50 p-0 text-center text-xs text-gray-600 [-moz-appearance:_textfield] focus:outline-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                    onChange={() => console.log("quantity change")}
+                    className="remove-arrow h-8 sm:h-10 w-8 sm:w-16 border-transparent text-center [-moz-appearance:_textfield] text-xs sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
                   />
-                </form>
+
+                  <button
+                    type="button"
+                    className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75"
+                  >
+                    &#43;
+                  </button>
+                </div>
 
                 <button
                   onClick={() => handleRemoveToCart(item.id)}
