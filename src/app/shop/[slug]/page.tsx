@@ -15,7 +15,7 @@ export default async function page({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <main className="pt-16 flex items-center justify-center min-h-[calc(100vh-216px)] sm:min-h-[calc(100vh-180px)] lg:min-h-[calc(100vh-92px)]">
+    <main className="pt-16 flex items-center justify-center">
       <section className="container mx-auto py-6 h-max">
         <nav className="px-4">
           <GoBackButton />{" "}

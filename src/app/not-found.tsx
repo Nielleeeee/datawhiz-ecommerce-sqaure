@@ -9,7 +9,7 @@ export default function NotFound() {
 
   return (
     <section className="bg-white">
-      <div className="container min-h-[calc(100vh-216px)] sm:min-h-[calc(100vh-180px)] lg:min-h-[calc(100vh-92px)] px-8 py-16 mx-auto flex items-center justify-center gap-12 flex-col md:flex-row">
+      <div className="container  px-8 py-16 mx-auto flex items-center justify-center gap-12 flex-col md:flex-row">
         <div className="wf-ull lg:w-1/2">
           <p className="text-sm font-medium text-blue-500">404 error</p>
           <h1 className="mt-3 text-2xl font-semibold text-gray-800 md:text-3xl">
