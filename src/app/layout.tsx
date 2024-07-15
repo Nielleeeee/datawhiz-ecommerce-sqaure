@@ -8,10 +8,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DataWhiz",  
+  title: "DataWhiz",
   alternates: {
     canonical: "/",
-  }
+  },
 };
 
 export default function RootLayout({
@@ -23,9 +23,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Provider>
-          <Header />
-          {children}
-          <Footer />
+          <div className="grid grid-rows-[1fr_auto] min-h-[100dvh]">
+            <Header />
+            {children}
+            <Footer />
+          </div>
         </Provider>
       </body>
     </html>
