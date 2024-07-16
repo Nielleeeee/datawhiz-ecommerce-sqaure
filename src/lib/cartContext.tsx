@@ -87,7 +87,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("Failed to add item to cart");
       }
 
-      setCart(null);
+      setCart(response);
       return response;
     } catch (error) {
       console.error("Error Adding to cart: ", error);
