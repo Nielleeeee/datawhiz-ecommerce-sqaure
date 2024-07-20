@@ -9,12 +9,13 @@ import TruckLoading from "@/components/loaders/truckLoading";
 import { ShopIllustration, Trash } from "@/components/ui/svg";
 import { useState, useEffect, useRef } from "react";
 
-
 export default function CartItems() {
   const { cart, removeToCart, updateCart, emptyCart } = useCart();
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [isUpdating, setIsUpdating] = useState(false);
+  const [updatingItemID, setUpdatingItemID] = useState<string | null>(null);
+  const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   useEffect(() => {
     if (cart) {
@@ -40,9 +41,17 @@ export default function CartItems() {
         [lineID]: newQuantity,
       }));
 
+      setUpdatingItemID(lineID);
+
+      requestAnimationFrame(() => {
+        if (inputRefs.current[lineID]) {
+          inputRefs.current[lineID]?.focus();
+        }
+      });
+
       debounceTimeout.current = setTimeout(async () => {
         updateQuantity(lineID, newQuantity);
-      }, 600);
+      }, 800);
     }
   };
 
@@ -52,18 +61,16 @@ export default function CartItems() {
 
       const response = updateCart(lineID, quantity);
 
-      await toast
-        .promise(response, {
-          pending: "Updating Cart... 🙄",
-          success: "Cart Updated. 👌",
-          error: "Something went wrong. 😱",
-        })
-        .then(() => {
-          setIsUpdating(false);
-          console.log(response);
-        });
+      await toast.promise(response, {
+        pending: "Updating Cart... 🙄",
+        success: "Cart Updated. 👌",
+        error: "Something went wrong. 😱",
+      });
     } catch (error) {
       throw Error(`Error: ${error}`);
+    } finally {
+      setIsUpdating(false);
+      setUpdatingItemID(null);
     }
   };
 
@@ -93,6 +100,8 @@ export default function CartItems() {
         <ul className="space-y-4">
           {cart.line_items.map((item: LineItem, index: number) => {
             const itemQuantity = quantities[item.id] ?? item.quantity;
+            const isItemUpdating =
+              updatingItemID !== null && updatingItemID !== item.id;
 
             return (
               <li key={index} className="flex items-center gap-2 sm:gap-4">
@@ -130,12 +139,17 @@ export default function CartItems() {
                       onClick={() =>
                         handleQuantityChange(item.id, itemQuantity - 1)
                       }
-                      disabled={itemQuantity <= 1 || isUpdating}
+                      disabled={
+                        itemQuantity <= 1 || isUpdating || isItemUpdating
+                      }
                     >
                       &minus;
                     </button>
 
                     <input
+                      ref={(el) => {
+                        inputRefs.current[item.id] = el;
+                      }}
                       type="number"
                       value={quantities[item.id]}
                       id={`quantity-${index}`}
@@ -145,7 +159,7 @@ export default function CartItems() {
                           parseInt(e.target.value, 10)
                         )
                       }
-                      disabled={isUpdating}
+                      disabled={isUpdating || isItemUpdating}
                       className="remove-arrow h-8 sm:h-10 w-8 sm:w-16 border-transparent text-center [-moz-appearance:_textfield] text-xs sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none disabled:cursor-not-allowed"
                     />
 
@@ -155,7 +169,7 @@ export default function CartItems() {
                       onClick={() =>
                         handleQuantityChange(item.id, itemQuantity + 1)
                       }
-                      disabled={isUpdating}
+                      disabled={isUpdating || isItemUpdating}
                     >
                       &#43;
                     </button>
