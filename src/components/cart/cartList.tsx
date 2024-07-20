@@ -7,42 +7,49 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import TruckLoading from "@/components/loaders/truckLoading";
 import { ShopIllustration, Trash } from "@/components/ui/svg";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-// +++++++++++++++++++++++++ Add onchange handler for direct update +++++++++++++++++++++++++
-// +++++++++++++++++++++++++ Add debounce function +++++++++++++++++++++++++
 
 export default function CartItems() {
   const { cart, removeToCart, updateCart, emptyCart } = useCart();
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (cart) {
       const initialQuantities: { [key: string]: number } = {};
+
       cart.line_items.forEach((item) => {
         initialQuantities[item.id] = item.quantity;
       });
-      setQuantities(initialQuantities);
 
-      console.log(quantities);
+      setQuantities(initialQuantities);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart]);
 
   const handleQuantityChange = (lineID: string, newQuantity: number) => {
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
     if (newQuantity > 0) {
       setQuantities((prevQuantities) => ({
         ...prevQuantities,
         [lineID]: newQuantity,
       }));
-      updateQuantity(lineID, newQuantity);
+
+      debounceTimeout.current = setTimeout(async () => {
+        updateQuantity(lineID, newQuantity);
+      }, 600);
     }
   };
 
   const updateQuantity = async (lineID: string, quantity: number) => {
     try {
       setIsUpdating(true);
+
       const response = updateCart(lineID, quantity);
 
       await toast
@@ -51,7 +58,10 @@ export default function CartItems() {
           success: "Cart Updated. 👌",
           error: "Something went wrong. 😱",
         })
-        .then(() => setIsUpdating(false));
+        .then(() => {
+          setIsUpdating(false);
+          console.log(response);
+        });
     } catch (error) {
       throw Error(`Error: ${error}`);
     }
@@ -116,7 +126,7 @@ export default function CartItems() {
                   <div className="flex items-center rounded border border-gray-200">
                     <button
                       type="button"
-                      className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75"
+                      className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75 disabled:cursor-not-allowed"
                       onClick={() =>
                         handleQuantityChange(item.id, itemQuantity - 1)
                       }
@@ -127,7 +137,7 @@ export default function CartItems() {
 
                     <input
                       type="number"
-                      value={itemQuantity}
+                      value={quantities[item.id]}
                       id={`quantity-${index}`}
                       onChange={(e) =>
                         handleQuantityChange(
@@ -136,12 +146,12 @@ export default function CartItems() {
                         )
                       }
                       disabled={isUpdating}
-                      className="remove-arrow h-8 sm:h-10 w-8 sm:w-16 border-transparent text-center [-moz-appearance:_textfield] text-xs sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none"
+                      className="remove-arrow h-8 sm:h-10 w-8 sm:w-16 border-transparent text-center [-moz-appearance:_textfield] text-xs sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none disabled:cursor-not-allowed"
                     />
 
                     <button
                       type="button"
-                      className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75"
+                      className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75 disabled:cursor-not-allowed"
                       onClick={() =>
                         handleQuantityChange(item.id, itemQuantity + 1)
                       }
