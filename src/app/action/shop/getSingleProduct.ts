@@ -1,10 +1,5 @@
-"use server";
+import commerce from "@/lib/commerce";
 
-import Commerce from "@chec/commerce.js";
-
-const commerce = new Commerce(`${process.env.CHEC_PUBLIC_API_KEY}`, false, {
-  allowSecretKey: true,
-} as any);
 export const getSingleProduct = async ({
   permalink,
 }: {
