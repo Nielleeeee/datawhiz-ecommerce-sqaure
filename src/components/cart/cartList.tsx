@@ -177,6 +177,7 @@ export default function CartItems() {
 
                   <button
                     onClick={() => handleRemoveToCart(item.id)}
+                    disabled={isUpdating}
                     className="text-gray-600 transition hover:text-red-600"
                   >
                     <span className="sr-only">Remove item</span>
