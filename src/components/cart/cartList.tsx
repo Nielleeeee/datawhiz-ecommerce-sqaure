@@ -27,7 +27,6 @@ export default function CartItems() {
 
       setQuantities(initialQuantities);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart]);
 
   const handleQuantityChange = (lineID: string, newQuantity: number) => {
@@ -104,27 +103,35 @@ export default function CartItems() {
               updatingItemID !== null && updatingItemID !== item.id;
 
             return (
-              <li key={index} className="flex items-center gap-2 sm:gap-4">
-                <Image
-                  src={`${item.image?.url}`}
-                  alt={item.name}
-                  width={100}
-                  height={100}
-                  className="size-16 rounded object-cover"
-                />
+              <li
+                key={index}
+                className="flex justify-between items-center gap-2"
+              >
+                <Link
+                  href={`/shop/${item.permalink}`}
+                  className="flex gap-2 sm:gap-4"
+                >
+                  <Image
+                    src={`${item.image?.url}`}
+                    alt={item.name}
+                    width={100}
+                    height={100}
+                    className="size-16 rounded object-cover"
+                  />
 
-                <div>
-                  <h3 className="text-sm text-gray-900">{item.name}</h3>
+                  <div>
+                    <h3 className="text-sm text-gray-900">{item.name}</h3>
 
-                  <dl className="mt-0.5 space-y-px text-[10px] text-gray-600">
-                    <div>
-                      <dt className="inline">Price:</dt>
-                      <dd className="inline">
-                        {item.price.formatted_with_symbol}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
+                    <dl className="mt-0.5 space-y-px text-[10px] text-gray-600">
+                      <div>
+                        <dt className="inline">Price:</dt>
+                        <dd className="inline">
+                          {item.price.formatted_with_symbol}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </Link>
 
                 <div className="flex flex-1 items-center justify-end gap-2">
                   <label htmlFor={`quantity-${index}`} className="sr-only">
@@ -178,7 +185,7 @@ export default function CartItems() {
                   <button
                     onClick={() => handleRemoveToCart(item.id)}
                     disabled={isUpdating}
-                    className="text-gray-600 transition hover:text-red-600"
+                    className="text-gray-600 transition disabled:text-gray-400 hover:text-red-600 disabled:cursor-not-allowed"
                   >
                     <span className="sr-only">Remove item</span>
 
