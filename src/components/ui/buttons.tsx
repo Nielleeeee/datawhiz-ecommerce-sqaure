@@ -30,9 +30,17 @@ export const CTAButton = ({
 export const GoBackButton = () => {
   const router = useRouter();
 
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/shop");
+    }
+  };
+
   return (
     <button
-      onClick={() => router.back()}
+      onClick={handleGoBack}
       className="cursor-pointer duration-200 hover:scale-125 active:scale-100"
       title="Go Back"
     >
