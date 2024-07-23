@@ -28,7 +28,7 @@ export default function ProductDetails(productData: Product) {
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
-    if (isNaN(value) && value < 1) {
+    if (isNaN(value) || value < 1) {
       setQuantity(1);
     } else if (value > productData.inventory.available) {
       setQuantity(productData.inventory.available);
@@ -44,19 +44,17 @@ export default function ProductDetails(productData: Product) {
 
         const response = addToCart(productData.id, quantity);
 
-        await toast
-          .promise(response, {
-            pending: "Adding to Cart... 🙄",
-            success: "Item Added to Cart. 👌",
-            error: "Something went wrong. 😱",
-          })
-          .then(() => {
-            setLoading(false);
-            setQuantity(1);
-          });
+        await toast.promise(response, {
+          pending: "Adding to Cart... 🙄",
+          success: "Item Added to Cart. 👌",
+          error: "Something went wrong. 😱",
+        });
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
+      setQuantity(1);
     }
   };
 
@@ -128,7 +126,8 @@ export default function ProductDetails(productData: Product) {
                 <div className="flex sm:items-center sm:justify-center w-full">
                   <button
                     onClick={minusQuantity}
-                    className="group py-4 px-6 border border-gray-400 rounded-l-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300"
+                    disabled={quantity <= 1}
+                    className="group py-4 px-6 border border-gray-400 rounded-l-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300 disabled:cursor-not-allowed"
                   >
                     <Minus />
                   </button>
@@ -144,7 +143,8 @@ export default function ProductDetails(productData: Product) {
 
                   <button
                     onClick={addQuantity}
-                    className="group py-4 px-6 border border-gray-400 rounded-r-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300"
+                    disabled={quantity >= productData.inventory.available}
+                    className="group py-4 px-6 border border-gray-400 rounded-r-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300 disabled:cursor-not-allowed"
                   >
                     <Add />
                   </button>
@@ -159,10 +159,13 @@ export default function ProductDetails(productData: Product) {
                 </button>
               </div>
               <div className="flex items-center gap-3">
-                <button className="group transition-all duration-500 p-4 rounded-full bg-indigo-50 hover:bg-indigo-100 hover:shadow-sm hover:shadow-indigo-300">
+                {/* <button className="group transition-all duration-500 p-4 rounded-full bg-indigo-50 hover:bg-indigo-100 hover:shadow-sm hover:shadow-indigo-300">
                   <Heart />
-                </button>
-                <Link href={productData.checkout_url.checkout} className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400">
+                </button> */}
+                <Link
+                  href={productData.checkout_url.checkout}
+                  className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400"
+                >
                   Buy Now
                 </Link>
               </div>
