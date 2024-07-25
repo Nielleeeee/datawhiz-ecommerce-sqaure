@@ -1,5 +1,6 @@
 import { getSingleProduct } from "@/app/action/shop/getSingleProduct";
 import ProductDetails from "@/components/product/productDetails";
+import RelatedProduct from "@/components/product/relatedProduct";
 import { GoBackButton } from "@/components/ui/buttons";
 import { Product } from "@chec/commerce.js/types/product";
 import { notFound } from "next/navigation";
@@ -22,6 +23,8 @@ export default async function page({ params }: { params: { slug: string } }) {
         </nav>
 
         <ProductDetails {...productData} />
+
+        <RelatedProduct relatedProductsData={productData.related_products} />
       </section>
     </main>
   );
