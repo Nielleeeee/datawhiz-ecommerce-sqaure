@@ -15,6 +15,10 @@ export default async function page({ params }: { params: { slug: string } }) {
     notFound();
   }
 
+  const hasRelatedProducts =
+    Array.isArray(productData.related_products) &&
+    productData.related_products.length > 0;
+
   return (
     <main className="pt-16 flex items-center justify-center">
       <section className="container mx-auto py-6 h-max">
@@ -24,7 +28,9 @@ export default async function page({ params }: { params: { slug: string } }) {
 
         <ProductDetails {...productData} />
 
-        <RelatedProduct relatedProductsData={productData.related_products} />
+        {hasRelatedProducts && (
+          <RelatedProduct relatedProductsData={productData.related_products} />
+        )}
       </section>
     </main>
   );
