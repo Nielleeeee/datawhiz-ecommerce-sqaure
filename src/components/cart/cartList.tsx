@@ -8,6 +8,8 @@ import Link from "next/link";
 import TruckLoading from "@/components/loaders/truckLoading";
 import { ShopIllustration, Trash } from "@/components/ui/svg";
 import { useState, useEffect, useRef } from "react";
+import { generateCartCheckoutToken } from "@/app/action/checkout/generateCheckoutToken";
+import { useRouter } from "next/navigation";
 
 export default function CartItems() {
   const { cart, removeToCart, updateCart, emptyCart } = useCart();
@@ -16,6 +18,8 @@ export default function CartItems() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [updatingItemID, setUpdatingItemID] = useState<string | null>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+
+  const router = useRouter();
 
   useEffect(() => {
     if (cart) {
@@ -28,6 +32,27 @@ export default function CartItems() {
       setQuantities(initialQuantities);
     }
   }, [cart]);
+
+  const handleCheckout = async () => {
+    try {
+      if (cart) {
+        const token = generateCartCheckoutToken(cart);
+
+        await toast
+          .promise(token, {
+            pending: "Checking out... 🙄",
+            success: "Redirecting. 👌",
+            error: "Something went wrong. 😱",
+          })
+          .then((token) => {
+            router.push(`/checkout?token=${token.id}`);
+          });
+      }
+    } catch (error) {
+      console.error("Handle Checkout Error: ", error);
+      throw Error;
+    }
+  };
 
   const handleQuantityChange = (lineID: string, newQuantity: number) => {
     if (debounceTimeout.current) {
@@ -267,12 +292,13 @@ export default function CartItems() {
           </div> */}
 
               <div className="flex justify-end">
-                <Link
-                  href={`${cart?.hosted_checkout_url}`}
+                <button
+                  onClick={handleCheckout}
+                  disabled={!cart}
                   className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
                 >
                   Checkout
-                </Link>
+                </button>
               </div>
             </div>
           </div>
