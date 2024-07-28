@@ -11,3 +11,14 @@ export const generateCartCheckoutToken = async (cart: Cart) => {
     throw error;
   }
 };
+
+export const validateCheckoutToken = async (token: string) => {
+  try {
+    const isTokenValid = await commerce.checkout.getToken(token);
+
+    return { valid: true, isTokenValid };
+  } catch (error) {
+    console.error("Error validating token: ", error);
+    throw error;
+  }
+};
