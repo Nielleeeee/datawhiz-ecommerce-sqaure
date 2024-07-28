@@ -24,9 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Provider>
           <div className="grid grid-rows-[1fr_auto] min-h-[100dvh]">
-            <Header />
             {children}
-            <Footer />
           </div>
         </Provider>
       </body>
