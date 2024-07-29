@@ -1,5 +1,6 @@
 import { Cart } from "@chec/commerce.js/types/cart";
 import commerce from "@/lib/commerce";
+import { CheckoutCapture } from "@chec/commerce.js/types/checkout-capture";
 
 export const generateCartCheckoutToken = async (cart: Cart) => {
   try {
@@ -14,11 +15,24 @@ export const generateCartCheckoutToken = async (cart: Cart) => {
 
 export const validateCheckoutToken = async (token: string) => {
   try {
-    const isTokenValid = await commerce.checkout.getToken(token);
+    const checkout = await commerce.checkout.getToken(token);
 
-    return { valid: true, isTokenValid };
+    return { valid: true, checkout };
   } catch (error) {
-    console.error("Error validating token: ", error);
+    return { valid: false, checkout: null };
+  }
+};
+
+export const captureOrder = async (
+  token: string,
+  checkoutCapture: CheckoutCapture
+) => {
+  try {
+    const order = await commerce.checkout.capture(token, checkoutCapture);
+
+    return order;
+  } catch (error) {
+    console.error("Error capturing order: ", error);
     throw error;
   }
 };
