@@ -5,7 +5,7 @@ import { GoBackButton } from "@/components/ui/buttons";
 import { Product } from "@chec/commerce.js/types/product";
 import { notFound } from "next/navigation";
 
-export default async function page({ params }: { params: { slug: string } }) {
+export default async function Page({ params }: { params: { slug: string } }) {
   const permalink = params.slug;
 
   const product = await getSingleProduct({ permalink });
