@@ -1,13 +1,42 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
-import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
+import { notFound, useSearchParams, useRouter } from "next/navigation";
 import { validateCheckoutToken } from "@/app/action/checkout/generateCheckoutToken";
+import { CheckoutToken } from "@chec/commerce.js/types/checkout-token";
+import Loading from "@/app/loading";
 
-export default async function page({ params }: { params: { token: string } }) {
-  const { token } = params;
-  const isTokenValid = await validateCheckoutToken(token);
+export default function Checkout() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const [loading, setLoading] = useState(true);
+  const [checkoutToken, setCheckoutToken] = useState<CheckoutToken | null>(
+    null
+  );
+  const router = useRouter();
 
-  if (!isTokenValid.valid) {
+  useEffect(() => {
+    const validateToken = async () => {
+      const { valid, checkout } = await validateCheckoutToken(token as string);
+
+      if (!valid) {
+        router.push("/404");
+      } else {
+        setCheckoutToken(checkout);
+        setLoading(false);
+      }
+    };
+
+    validateToken();
+  }, [checkoutToken, router, token]);
+
+  if (!token) {
     notFound();
+  }
+
+  if (loading) {
+    return <Loading />;
   }
 
   return (
