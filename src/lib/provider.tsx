@@ -1,3 +1,5 @@
+"use client";
+
 import { CartProvider } from "@/lib/cartContext";
 import { ToastContainer } from "react-toastify";
 import { usePathname } from "next/navigation";
