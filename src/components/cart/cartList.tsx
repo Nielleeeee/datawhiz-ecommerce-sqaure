@@ -8,7 +8,7 @@ import Link from "next/link";
 import TruckLoading from "@/components/loaders/truckLoading";
 import { ShopIllustration, Trash } from "@/components/ui/svg";
 import { useState, useEffect, useRef } from "react";
-import { generateCartCheckoutToken } from "@/app/action/checkout/generateCheckoutToken";
+import { generateCartCheckoutToken } from "@/app/action/checkout/checkout";
 import { useRouter } from "next/navigation";
 
 export default function CartItems() {
