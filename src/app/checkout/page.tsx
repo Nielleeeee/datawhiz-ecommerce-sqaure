@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
 import { notFound, useSearchParams, useRouter } from "next/navigation";
-import { validateCheckoutToken } from "@/app/action/checkout/generateCheckoutToken";
+import { validateCheckoutToken } from "@/app/action/checkout/checkout";
 import { CheckoutToken } from "@chec/commerce.js/types/checkout-token";
 import Loading from "@/app/loading";
 
