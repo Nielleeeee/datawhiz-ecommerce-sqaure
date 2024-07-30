@@ -23,6 +23,7 @@ export default function Checkout() {
       if (!valid) {
         router.push("/404");
       } else {
+        console.log("Checkout: ", checkout);
         setCheckoutToken(checkout);
         setLoading(false);
       }
@@ -48,6 +49,7 @@ export default function Checkout() {
               Secure Checkout
               <span className="mt-2 block h-1 w-10 bg-teal-600 sm:w-20"></span>
             </h1>
+
             <form action="" className="mt-10 flex flex-col space-y-4">
               <div>
                 <label
@@ -140,6 +142,7 @@ export default function Checkout() {
                 />
               </div>
             </form>
+
             <p className="mt-10 text-center text-sm font-semibold text-gray-500">
               By placing this order you agree to the{" "}
               <a
@@ -167,6 +170,7 @@ export default function Checkout() {
             />
             <div className="absolute inset-0 h-full w-full bg-gradient-to-t from-teal-800 to-teal-400 opacity-95"></div>
           </div>
+          
           <div className="relative">
             <ul className="space-y-5">
               <li className="flex justify-between">
@@ -206,7 +210,9 @@ export default function Checkout() {
                 <p className="text-sm font-semibold text-white">$350.00</p>
               </li>
             </ul>
+            
             <div className="my-5 h-0.5 w-full bg-white bg-opacity-30"></div>
+
             <div className="space-y-2">
               <p className="flex justify-between text-lg font-bold text-white">
                 <span>Total price:</span>
@@ -218,6 +224,7 @@ export default function Checkout() {
               </p>
             </div>
           </div>
+
           <div className="relative mt-10 text-white">
             <h3 className="mb-5 text-lg font-bold">Support</h3>
             <p className="text-sm font-semibold">
@@ -231,6 +238,7 @@ export default function Checkout() {
               Call us now for payment related issues
             </p>
           </div>
+
           <div className="relative mt-10 flex">
             <p className="flex flex-col">
               <span className="text-sm font-bold text-white">
