@@ -1,6 +1,7 @@
 import { Cart } from "@chec/commerce.js/types/cart";
 import commerce from "@/lib/commerce";
 import { CheckoutCapture } from "@chec/commerce.js/types/checkout-capture";
+import { CheckQuantityResponse } from "@chec/commerce.js/features/checkout";
 
 export const generateCartCheckoutToken = async (cart: Cart) => {
   try {
@@ -36,3 +37,13 @@ export const captureOrder = async (
     throw error;
   }
 };
+
+export const validateQuantity = async (token: string, lineItemId: string, data: object) => {
+  try {
+    const isQuantityValid = await commerce.checkout.checkQuantity(token, lineItemId, data);
+
+    return { valid: true, isQuantityValid };
+  } catch (error) {
+    return { valid: false, isQuantityValid: null };
+  }
+}
