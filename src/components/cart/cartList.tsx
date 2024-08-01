@@ -36,7 +36,7 @@ export default function CartItems() {
   const handleCheckout = async () => {
     try {
       if (cart) {
-        const token = generateCartCheckoutToken(cart);
+        const token = generateCartCheckoutToken(cart.id, "cart");
 
         await toast
           .promise(token, {
