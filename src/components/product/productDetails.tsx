@@ -8,11 +8,14 @@ import { useState } from "react";
 import { Minus, Add, Cart, Heart } from "@/components/ui/svg";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import { generateCartCheckoutToken } from "@/app/action/checkout/checkout";
+import { useRouter } from "next/navigation";
 
 export default function ProductDetails(productData: Product) {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const addQuantity = () => {
     setQuantity(
@@ -55,6 +58,25 @@ export default function ProductDetails(productData: Product) {
     } finally {
       setLoading(false);
       setQuantity(1);
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const token = generateCartCheckoutToken(productData.id, "product_id");
+
+      await toast
+        .promise(token, {
+          pending: "Checking out... 🙄",
+          success: "Redirecting. 👌",
+          error: "Something went wrong. 😱",
+        })
+        .then((token) => {
+          router.push(`/checkout?token=${token.id}`);
+        });
+    } catch (error) {
+      console.error("Handle Checkout Error: ", error);
+      throw Error;
     }
   };
 
@@ -162,12 +184,12 @@ export default function ProductDetails(productData: Product) {
                 {/* <button className="group transition-all duration-500 p-4 rounded-full bg-indigo-50 hover:bg-indigo-100 hover:shadow-sm hover:shadow-indigo-300">
                   <Heart />
                 </button> */}
-                <Link
-                  href={productData.checkout_url.checkout}
+                <button
+                  onClick={handleCheckout}
                   className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400"
                 >
                   Buy Now
-                </Link>
+                </button>
               </div>
             </div>
           </div>
