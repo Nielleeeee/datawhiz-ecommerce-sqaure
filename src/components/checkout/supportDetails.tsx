@@ -6,10 +6,10 @@ export default function SupportDetails() {
       <div className="relative mt-10 text-white">
         <h3 className="mb-5 text-lg font-bold">Support</h3>
         <p className="text-sm font-semibold">
-          +01 653 235 211 <span className="font-light">(International)</span>
+          +01 234 567 890 <span className="font-light">(International)</span>
         </p>
         <p className="mt-1 text-sm font-semibold">
-          support@nanohair.com <span className="font-light">(Email)</span>
+          support@datawhiz.com <span className="font-light">(Email)</span>
         </p>
         <p className="mt-2 text-xs font-medium">
           Call us now for payment related issues
