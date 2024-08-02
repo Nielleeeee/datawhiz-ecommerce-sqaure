@@ -84,7 +84,7 @@ export default function Checkout() {
   return (
     <main className="relative mx-auto w-full bg-white">
       <div className="grid min-h-screen grid-cols-10">
-        <CheckoutForm />
+        {checkoutToken && <CheckoutForm {...checkoutToken} />}
 
         <div className="relative col-span-full flex flex-col py-6 pl-8 pr-4 sm:py-12 lg:col-span-4 lg:py-24">
           <h2 className="sr-only">Order summary</h2>
