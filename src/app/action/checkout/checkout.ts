@@ -1,6 +1,12 @@
 import commerce from "@/lib/commerce";
 import { CheckoutCapture } from "@chec/commerce.js/types/checkout-capture";
 
+interface validateQuantityParams {
+  token: string;
+  lineItemId: string;
+  data: { amount: number; variant_id?: string };
+}
+
 export const generateCartCheckoutToken = async (
   product: string,
   checkoutType: "cart" | "product_id" | "permalink"
@@ -8,7 +14,6 @@ export const generateCartCheckoutToken = async (
   try {
     const token = commerce.checkout.generateToken(product, {
       type: checkoutType,
-      
     });
 
     return token;
@@ -28,11 +33,11 @@ export const validateCheckoutToken = async (token: string) => {
   }
 };
 
-export const validateQuantity = async (
-  token: string,
-  lineItemId: string,
-  data: object
-) => {
+export const validateQuantity = async ({
+  token,
+  lineItemId,
+  data,
+}: validateQuantityParams) => {
   try {
     const isQuantityValid = await commerce.checkout.checkQuantity(
       token,
