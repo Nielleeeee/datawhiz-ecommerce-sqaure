@@ -1,4 +1,4 @@
-import CartItems from "@/components/cart/cartList";
+// import CartItems from "@/components/cart/cartList";
 
 export default function Cart() {
   return (
@@ -8,7 +8,7 @@ export default function Cart() {
       </h1>
 
       <section className="container flex items-center justify-center mx-auto px-4 pt-5 md:pt-10 pb-10 md:pb-20">
-        <CartItems />
+        {/* <CartItems /> */}
       </section>
     </main>
   );
