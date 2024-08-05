@@ -6,11 +6,11 @@ export default async function Shop() {
   const { products } = await getProducts();
 
   const ProductList = () => {
-    if (products && products.data.length !== 0) {
+    if (products && products.objects && products.objects.length > 0) {
       return (
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.data.map((product) => (
-            <ProductCard key={product.id} {...product} />
+          {products.objects.map((product) => (
+            <ProductCard key={product.id} {...product.itemData} />
           ))}
         </div>
       );
