@@ -1,17 +1,19 @@
-import commerce from "@/lib/commerce";
+"use server";
 
-export const getSingleProduct = async ({
-  permalink,
-}: {
-  permalink: string;
-}) => {
-  try {
-    const product = await commerce.products.retrieve(permalink, {
-      type: "permalink",
-    });
+// import squareClient from "@/lib/square";
 
-    return { status: true, error: false, data: product };
-  } catch (error) {
-    return { status: false, error: error as any };
-  }
-};
+// export const getSingleProduct = async ({
+//   permalink,
+// }: {
+//   permalink: string;
+// }) => {
+//   try {
+//     const product = await commerce.products.retrieve(permalink, {
+//       type: "permalink",
+//     });
+
+//     return { status: true, error: false, data: product };
+//   } catch (error) {
+//     return { status: false, error: error as any };
+//   }
+// };
