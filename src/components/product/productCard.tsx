@@ -3,42 +3,58 @@
 import { MouseEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Product } from "@chec/commerce.js/types/product";
-import { useCart } from "@/lib/cartContext";
 import { toast } from "react-toastify";
+import { CatalogItem } from "square/dist/types/models/catalogItem";
+import { CatalogObject } from "square";
 
-export default function ProductCard(product: Product) {
-  const { addToCart } = useCart();
+export default function ProductCard({itemData, image}: {itemData: CatalogItem, image?: CatalogObject}) {
   const [loading, setLoading] = useState(false);
 
-  const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    event.preventDefault();
+  console.log("Item Image:", image);
 
-    try {
-      setLoading(true);
+  // const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
+  //   event.stopPropagation();
+  //   event.preventDefault();
 
-      const response = addToCart(product.id, 1);
+  //   try {
+  //     setLoading(true);
 
-      await toast
-        .promise(response, {
-          pending: "Adding to Cart... 🙄",
-          success: "Item Added to Cart. 👌",
-          error: "Something went wrong. 😱",
-        })
-        .then(() => setLoading(false));
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //     const response = addToCart(itemData.id, 1);
+
+  //     await toast
+  //       .promise(response, {
+  //         pending: "Adding to Cart... 🙄",
+  //         success: "Item Added to Cart. 👌",
+  //         error: "Something went wrong. 😱",
+  //       })
+  //       .then(() => setLoading(false));
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
+  const imageUrl = image?.imageData?.url;
+
+  const itemPrice =
+    itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount != null
+      ? new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency:
+            itemData.variations[0].itemVariationData.priceMoney.currency ||
+            "USD",
+        }).format(
+          Number(itemData.variations[0].itemVariationData.priceMoney.amount) /
+            100
+        )
+      : "Price not available";
 
   return (
     <Link
-      href={`/shop/${product.permalink}`}
+      href={`/shop/${itemData.name}`}
       className="group relative block overflow-hidden rounded-lg"
     >
       <Image
-        src={product.image?.url ?? ""}
+        src={imageUrl ?? ""}
         alt="some image"
         className="h-64 w-full object-cover transition duration-500 scale-[1.2] group-hover:scale-100 sm:h-72"
         width={500}
@@ -52,16 +68,14 @@ export default function ProductCard(product: Product) {
         </span> */}
 
         <h3 className="mt-4 text-lg font-medium text-gray-900">
-          {product.name}
+          {itemData.name}
         </h3>
 
-        <p className="mt-1.5 text-sm text-gray-700">
-          {product.price.formatted_with_symbol}
-        </p>
+        <p className="mt-1.5 text-sm text-gray-700">{itemPrice}</p>
 
         <form className="mt-4">
           <button
-            onClick={handleAddToCartClick}
+            // onClick={handleAddToCartClick}
             disabled={loading}
             className="block w-full rounded bg-blue-500 disabled:bg-gray-500 text-white p-4 text-sm font-medium transition hover:scale-105"
           >
