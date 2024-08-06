@@ -1,16 +1,21 @@
 import ProductCard from "@/components/product/productCard";
 import { getProducts } from "@/app/action/shop/getProduct";
 import { ShopIllustration } from "@/components/ui/svg";
+import { CatalogItem, CatalogObject } from "square";
 
 export default async function Shop() {
   const { products } = await getProducts();
 
   const ProductList = () => {
-    if (products && products.objects && products.objects.length > 0) {
+    if (products && products.length > 0) {
       return (
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.objects.map((product) => (
-            <ProductCard key={product.id} {...product.itemData} />
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              itemData={product.itemData as CatalogItem}
+              image={product.image as CatalogObject}
+            />
           ))}
         </div>
       );
