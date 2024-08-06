@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "cdn.chec.io",
+        hostname: "items-images-sandbox.s3.us-west-2.amazonaws.com",
         port: "",
       },
     ],
