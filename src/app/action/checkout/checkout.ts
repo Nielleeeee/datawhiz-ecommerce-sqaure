@@ -1,66 +1,66 @@
-import commerce from "@/lib/commerce";
-import { CheckoutCapture } from "@chec/commerce.js/types/checkout-capture";
+// "use server";
 
-interface validateQuantityParams {
-  token: string;
-  lineItemId: string;
-  data: { amount: number; variant_id?: string };
-}
 
-export const generateCartCheckoutToken = async (
-  product: string,
-  checkoutType: "cart" | "product_id" | "permalink"
-) => {
-  try {
-    const token = commerce.checkout.generateToken(product, {
-      type: checkoutType,
-    });
+// interface validateQuantityParams {
+//   token: string;
+//   lineItemId: string;
+//   data: { amount: number; variant_id?: string };
+// }
 
-    return token;
-  } catch (error) {
-    console.error("Error Checking Out: ", error);
-    throw error;
-  }
-};
+// export const generateCartCheckoutToken = async (
+//   product: string,
+//   checkoutType: "cart" | "product_id" | "permalink"
+// ) => {
+//   try {
+//     const token = commerce.checkout.generateToken(product, {
+//       type: checkoutType,
+//     });
 
-export const validateCheckoutToken = async (token: string) => {
-  try {
-    const checkout = await commerce.checkout.getToken(token);
+//     return token;
+//   } catch (error) {
+//     console.error("Error Checking Out: ", error);
+//     throw error;
+//   }
+// };
 
-    return { valid: true, checkout };
-  } catch (error) {
-    return { valid: false, checkout: null };
-  }
-};
+// export const validateCheckoutToken = async (token: string) => {
+//   try {
+//     const checkout = await commerce.checkout.getToken(token);
 
-export const validateQuantity = async ({
-  token,
-  lineItemId,
-  data,
-}: validateQuantityParams) => {
-  try {
-    const isQuantityValid = await commerce.checkout.checkQuantity(
-      token,
-      lineItemId,
-      data
-    );
+//     return { valid: true, checkout };
+//   } catch (error) {
+//     return { valid: false, checkout: null };
+//   }
+// };
 
-    return { valid: true, isQuantityValid };
-  } catch (error) {
-    return { valid: false, isQuantityValid: null };
-  }
-};
+// export const validateQuantity = async ({
+//   token,
+//   lineItemId,
+//   data,
+// }: validateQuantityParams) => {
+//   try {
+//     const isQuantityValid = await commerce.checkout.checkQuantity(
+//       token,
+//       lineItemId,
+//       data
+//     );
 
-export const captureOrder = async (
-  token: string,
-  checkoutCapture: CheckoutCapture
-) => {
-  try {
-    const order = await commerce.checkout.capture(token, checkoutCapture);
+//     return { valid: true, isQuantityValid };
+//   } catch (error) {
+//     return { valid: false, isQuantityValid: null };
+//   }
+// };
 
-    return order;
-  } catch (error) {
-    console.error("Error capturing order: ", error);
-    throw error;
-  }
-};
+// export const captureOrder = async (
+//   token: string,
+//   checkoutCapture: CheckoutCapture
+// ) => {
+//   try {
+//     const order = await commerce.checkout.capture(token, checkoutCapture);
+
+//     return order;
+//   } catch (error) {
+//     console.error("Error capturing order: ", error);
+//     throw error;
+//   }
+// };
