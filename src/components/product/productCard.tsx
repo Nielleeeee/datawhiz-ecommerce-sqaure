@@ -7,10 +7,16 @@ import { toast } from "react-toastify";
 import { CatalogItem } from "square/dist/types/models/catalogItem";
 import { CatalogObject } from "square";
 
-export default function ProductCard({itemData, image}: {itemData: CatalogItem, image?: CatalogObject}) {
+export default function ProductCard({
+  itemID,
+  itemData,
+  image,
+}: {
+  itemID: string;
+  itemData: CatalogItem;
+  image?: CatalogObject;
+}) {
   const [loading, setLoading] = useState(false);
-
-  console.log("Item Image:", image);
 
   // const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
   //   event.stopPropagation();
@@ -48,9 +54,13 @@ export default function ProductCard({itemData, image}: {itemData: CatalogItem, i
         )
       : "Price not available";
 
+  const permalink = itemData.name
+    ? `${itemData.name.toLowerCase().replace(/\s+/g, "-")}-${itemID}`
+    : null;
+
   return (
     <Link
-      href={`/shop/${itemData.name}`}
+      href={`/shop/${permalink}`}
       className="group relative block overflow-hidden rounded-lg"
     >
       <Image
