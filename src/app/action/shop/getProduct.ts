@@ -36,8 +36,6 @@ export const getProducts = async () => {
         }
       );
 
-      console.log("Product with images:", productWithImages);
-
       return { status: true, error: false, products: productWithImages };
     } else {
       return { status: false, error: "No items found", products: [] };
