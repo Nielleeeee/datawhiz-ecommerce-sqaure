@@ -13,6 +13,7 @@ export default async function Shop() {
           {products.map((product) => (
             <ProductCard
               key={product.id}
+              itemID={product.id}
               itemData={product.itemData as CatalogItem}
               image={product.image as CatalogObject}
             />
