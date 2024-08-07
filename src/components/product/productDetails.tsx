@@ -1,84 +1,103 @@
 "use client";
 
-import { Product } from "@chec/commerce.js/types/product";
 import Image from "next/image";
 import parse from "html-react-parser";
-import { useCart } from "@/lib/cartContext";
 import { useState } from "react";
 import { Minus, Add, Cart, Heart } from "@/components/ui/svg";
 import { toast } from "react-toastify";
 import Link from "next/link";
-import { generateCartCheckoutToken } from "@/app/action/checkout/checkout";
+// import { generateCartCheckoutToken } from "@/app/action/checkout/checkout";
 import { useRouter } from "next/navigation";
+import { CatalogItem, CatalogObject } from "square";
 
-export default function ProductDetails(productData: Product) {
-  const { addToCart } = useCart();
+export default function ProductDetails({
+  itemID,
+  itemData,
+  image,
+}: {
+  itemID: string;
+  itemData: CatalogItem;
+  image?: CatalogObject;
+}) {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const addQuantity = () => {
-    setQuantity(
-      quantity < productData.inventory.available
-        ? quantity + 1
-        : productData.inventory.available
-    );
-  };
+  const itemPrice =
+    itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount != null
+      ? new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency:
+            itemData.variations[0].itemVariationData.priceMoney.currency ||
+            "USD",
+        }).format(
+          Number(itemData.variations[0].itemVariationData.priceMoney.amount) /
+            100
+        )
+      : "Price not available";
 
-  const minusQuantity = () => {
-    setQuantity(quantity > 1 ? quantity - 1 : 1);
-  };
+  // const addQuantity = () => {
+  //   setQuantity(
+  //     quantity < productData.inventory.available
+  //       ? quantity + 1
+  //       : productData.inventory.available
+  //   );
+  // };
 
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (isNaN(value) || value < 1) {
-      setQuantity(1);
-    } else if (value > productData.inventory.available) {
-      setQuantity(productData.inventory.available);
-    } else {
-      setQuantity(value);
-    }
-  };
+  // const minusQuantity = () => {
+  //   setQuantity(quantity > 1 ? quantity - 1 : 1);
+  // };
 
-  const handleAddToCartClick = async () => {
-    try {
-      if (quantity > 1 && quantity <= productData.inventory.available) {
-        setLoading(true);
+  // const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = parseInt(e.target.value, 10);
+  //   if (isNaN(value) || value < 1) {
+  //     setQuantity(1);
+  //   } else if (value > productData.inventory.available) {
+  //     setQuantity(productData.inventory.available);
+  //   } else {
+  //     setQuantity(value);
+  //   }
+  // };
 
-        const response = addToCart(productData.id, quantity);
+  // const handleAddToCartClick = async () => {
+  //   try {
+  //     if (quantity > 1 && quantity <= productData.inventory.available) {
+  //       setLoading(true);
 
-        await toast.promise(response, {
-          pending: "Adding to Cart... 🙄",
-          success: "Item Added to Cart. 👌",
-          error: "Something went wrong. 😱",
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-      setQuantity(1);
-    }
-  };
+  //       const response = addToCart(productData.id, quantity);
 
-  const handleCheckout = async () => {
-    try {
-      const token = generateCartCheckoutToken(productData.id, "product_id");
+  //       await toast.promise(response, {
+  //         pending: "Adding to Cart... 🙄",
+  //         success: "Item Added to Cart. 👌",
+  //         error: "Something went wrong. 😱",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //     setQuantity(1);
+  //   }
+  // };
 
-      await toast
-        .promise(token, {
-          pending: "Checking out... 🙄",
-          success: "Redirecting. 👌",
-          error: "Something went wrong. 😱",
-        })
-        .then((token) => {
-          router.push(`/checkout?token=${token.id}`);
-        });
-    } catch (error) {
-      console.error("Handle Checkout Error: ", error);
-      throw Error;
-    }
-  };
+  // const handleCheckout = async () => {
+  //   try {
+  //     const token = generateCartCheckoutToken(productData.id, "product_id");
+
+  //     await toast
+  //       .promise(token, {
+  //         pending: "Checking out... 🙄",
+  //         success: "Redirecting. 👌",
+  //         error: "Something went wrong. 😱",
+  //       })
+  //       .then((token) => {
+  //         router.push(`/checkout?token=${token.id}`);
+  //       });
+  //   } catch (error) {
+  //     console.error("Handle Checkout Error: ", error);
+  //     throw Error;
+  //   }
+  // };
 
   return (
     <section className="relative py-10">
@@ -87,8 +106,8 @@ export default function ProductDetails(productData: Product) {
           <div className="img">
             <div className="img-box h-full max-lg:mx-auto ">
               <Image
-                src={`${productData.image?.url}`}
-                alt={productData.name}
+                src={`${image?.imageData?.url}`}
+                alt={itemData.name as string}
                 // className="max-lg:mx-auto lg:ml-auto h-full"
                 className="h-auto w-full rounded-md"
                 width={500}
@@ -99,25 +118,25 @@ export default function ProductDetails(productData: Product) {
           <div className="data w-full lg:pr-8 pr-0 xl:justify-start justify-center flex items-center max-lg:pb-10 xl:my-2 lg:my-5 my-0">
             <div className="data w-full max-w-xl">
               <p className="text-lg font-medium leading-8 text-blue-700 mb-4">
-                {productData.categories[0].name}
+                {/* {productData.categories[0].name} */}
               </p>
               <h2 className="font-manrope font-bold text-3xl leading-10 text-gray-900 mb-2 capitalize">
-                {productData.name}
+                {itemData.name}
               </h2>
               <div className="flex flex-col sm:flex-row sm:items-center mb-6">
                 <h6 className="font-manrope font-semibold text-2xl leading-9 text-gray-900 pr-5 sm:border-r border-gray-200 mr-5">
-                  {productData.price.formatted_with_symbol}
+                  {itemPrice}
                 </h6>
                 <div className="flex items-center gap-2">
                   <span className="pl-2 font-normal leading-7 text-gray-600">
-                    {productData.inventory.available} Available
+                    {/* {productData.inventory.available} Available */}
                   </span>
                 </div>
               </div>
 
-              {productData.description && (
+              {itemData.descriptionHtml && (
                 <div className="text-black text-base font-normal mb-5">
-                  {parse(productData.description)}
+                  {parse(itemData.descriptionHtml)}
                 </div>
               )}
 
@@ -147,7 +166,7 @@ export default function ProductDetails(productData: Product) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-8">
                 <div className="flex sm:items-center sm:justify-center w-full">
                   <button
-                    onClick={minusQuantity}
+                    // onClick={minusQuantity}
                     disabled={quantity <= 1}
                     className="group py-4 px-6 border border-gray-400 rounded-l-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300 disabled:cursor-not-allowed"
                   >
@@ -157,22 +176,22 @@ export default function ProductDetails(productData: Product) {
                   <input
                     type="number"
                     value={quantity}
-                    onChange={handleQuantityChange}
+                    // onChange={handleQuantityChange}
                     className="remove-arrow font-semibold text-gray-900 cursor-pointer text-lg py-[13px] px-6 w-full sm:max-w-[118px] outline-0 border-y border-gray-400 bg-transparent placeholder:text-gray-900 text-center hover:bg-gray-50"
                     min={"1"}
-                    max={productData.inventory.available}
+                    // max={productData.inventory.available}
                   />
 
                   <button
-                    onClick={addQuantity}
-                    disabled={quantity >= productData.inventory.available}
+                    // onClick={addQuantity}
+                    // disabled={quantity >= productData.inventory.available}
                     className="group py-4 px-6 border border-gray-400 rounded-r-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300 disabled:cursor-not-allowed"
                   >
                     <Add />
                   </button>
                 </div>
                 <button
-                  onClick={handleAddToCartClick}
+                  // onClick={handleAddToCartClick}
                   disabled={loading}
                   className="group py-4 px-5 rounded-full bg-indigo-200 disabled:bg-gray-200 text-indigo-600 font-semibold text-lg w-full flex items-center justify-center gap-2 transition-all duration-500 hover:bg-indigo-100"
                 >
@@ -185,7 +204,7 @@ export default function ProductDetails(productData: Product) {
                   <Heart />
                 </button> */}
                 <button
-                  onClick={handleCheckout}
+                  // onClick={handleCheckout}
                   className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400"
                 >
                   Buy Now
