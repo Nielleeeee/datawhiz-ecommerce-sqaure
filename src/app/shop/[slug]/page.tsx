@@ -11,15 +11,13 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const product = await getSingleProduct(itemID as string);
   const productData = product.data;
 
-  const itemData = productData?.itemData;
+  const itemData = productData?.item?.itemData;
   const itemImage = productData?.image;
+  const itemCategory = productData?.category?.categoryData;
 
-  if (
-    !product.status ||
-    product.error.statusCode === 404 ||
-    !itemData ||
-    !itemImage
-  ) {
+  console.log("Product Data: ", productData?.item);
+
+  if (!product.status || !product.data || !itemData || !itemImage) {
     notFound();
   }
 
@@ -38,6 +36,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           itemID={itemID as string}
           itemData={itemData}
           image={itemImage}
+          category={itemCategory}
         />
 
         {/* {hasRelatedProducts && (
