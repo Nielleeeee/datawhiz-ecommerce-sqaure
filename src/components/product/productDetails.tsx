@@ -8,16 +8,18 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 // import { generateCartCheckoutToken } from "@/app/action/checkout/checkout";
 import { useRouter } from "next/navigation";
-import { CatalogItem, CatalogObject } from "square";
+import { CatalogItem, CatalogObject, CatalogCategory } from "square";
 
 export default function ProductDetails({
   itemID,
   itemData,
   image,
+  category,
 }: {
   itemID: string;
   itemData: CatalogItem;
   image?: CatalogObject;
+  category?: CatalogCategory | null;
 }) {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -118,7 +120,7 @@ export default function ProductDetails({
           <div className="data w-full lg:pr-8 pr-0 xl:justify-start justify-center flex items-center max-lg:pb-10 xl:my-2 lg:my-5 my-0">
             <div className="data w-full max-w-xl">
               <p className="text-lg font-medium leading-8 text-blue-700 mb-4">
-                {/* {productData.categories[0].name} */}
+                {category?.name}
               </p>
               <h2 className="font-manrope font-bold text-3xl leading-10 text-gray-900 mb-2 capitalize">
                 {itemData.name}
