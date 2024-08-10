@@ -14,10 +14,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const itemData = productData?.item?.itemData;
   const itemImage = productData?.image;
   const itemCategory = productData?.category?.categoryData;
+  const variationStocks = productData?.variationStocks;
 
-  console.log("Product Data: ", productData?.item);
 
-  if (!product.status || !product.data || !itemData || !itemImage) {
+  if (!product.status || !product.data || !itemData || !itemImage || !variationStocks) {
     notFound();
   }
 
@@ -37,6 +37,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           itemData={itemData}
           image={itemImage}
           category={itemCategory}
+          variationStocks={variationStocks}
         />
 
         {/* {hasRelatedProducts && (
