@@ -15,11 +15,13 @@ export default function ProductDetails({
   itemData,
   image,
   category,
+  variationStocks,
 }: {
   itemID: string;
   itemData: CatalogItem;
   image?: CatalogObject;
   category?: CatalogCategory | null;
+  variationStocks: Record<string, number>;
 }) {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -131,7 +133,7 @@ export default function ProductDetails({
                 </h6>
                 <div className="flex items-center gap-2">
                   <span className="pl-2 font-normal leading-7 text-gray-600">
-                    {/* {productData.inventory.available} Available */}
+                    {variationStocks[itemData.variations![0].id]} Available
                   </span>
                 </div>
               </div>
