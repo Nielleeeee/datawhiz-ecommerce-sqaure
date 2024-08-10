@@ -7,6 +7,7 @@ interface ProductData {
   item: CatalogObject | null;
   image?: CatalogObject | null;
   category?: CatalogObject | null;
+  variationStocks: Record<string, number>;
 }
 
 type ReturnProduct = {
@@ -28,10 +29,23 @@ export const getSingleProduct = async (itemID: string) => {
     const productCategoryID =
       product.result.object?.itemData?.reportingCategory?.id;
 
+    const variantsID = product.result.object.itemData?.variations;
+
+    const variationStocks: Record<string, number> = {};
+
+    for (const variant of variantsID!) {
+      const stockResponse = await squareClient.inventoryApi.retrieveInventoryCount(variant.id);
+      const stockData = stockResponse.result.counts;
+
+      if (stockData && stockData.length > 0) {
+        variationStocks[variant.id] = Number(stockData[0].quantity || 0);
+      }
+    }
+
     let returnProduct: ReturnProduct = {
       status: true,
       error: false,
-      data: { item: product.result.object, image: null, category: null },
+      data: { item: product.result.object, image: null, category: null, variationStocks },
     };
 
     if (productImageID) {
