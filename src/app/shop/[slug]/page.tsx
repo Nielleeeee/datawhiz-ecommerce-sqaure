@@ -3,6 +3,7 @@ import ProductDetails from "@/components/product/productDetails";
 import RelatedProduct from "@/components/product/relatedProduct";
 import { GoBackButton } from "@/components/ui/buttons";
 import { notFound } from "next/navigation";
+import { getRelatedProducts } from "@/app/action/shop/getRelatedProducts";
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const slug = params.slug;
@@ -16,8 +17,24 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const itemCategory = productData?.category?.categoryData;
   const variationStocks = productData?.variationStocks;
 
+  let relatedProductsData;
 
-  if (!product.status || !product.data || !itemData || !itemImage || !variationStocks) {
+  if (itemData?.reportingCategory) {
+    const relatedProduct = await getRelatedProducts(
+      productData?.item?.id!,
+      itemData?.reportingCategory?.id!
+    );
+
+    // push to relatedProductsData
+  }
+
+  if (
+    !product.status ||
+    !product.data ||
+    !itemData ||
+    !itemImage ||
+    !variationStocks
+  ) {
     notFound();
   }
 
