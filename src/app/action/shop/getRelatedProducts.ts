@@ -19,14 +19,31 @@ export const getRelatedProducts = async (
       }
     );
 
-    const relatedProducts = categoryProducts.result.objects?.filter(
-      (item) => item.id !== itemID
-    );
+    const relatedProducts = categoryProducts.result.objects
+      ?.filter((item) => item.id !== itemID)
+      .slice(0, 4);
+
+    let relatedProductsWithImage = [];
+
+    for (const product of relatedProducts!) {
+      const firstImageID = product.itemData?.imageIds?.[0];
+
+      let imageData = null;
+
+      if (firstImageID) {
+        const productImage =
+          await squareClient.catalogApi.retrieveCatalogObject(firstImageID);
+
+        imageData = productImage.result.object;
+      }
+
+      relatedProductsWithImage.push({itemData: product, imageData})
+    }
 
     return {
       status: true,
       error: false,
-      data: relatedProducts,
+      data: relatedProductsWithImage,
     };
   } catch (error) {
     return {
