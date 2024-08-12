@@ -11,7 +11,7 @@ export default function RelatedProduct({
   }[];
 }) {
   return (
-    <section className=" px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+    <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="flex justify-between">
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">
           Related Products
