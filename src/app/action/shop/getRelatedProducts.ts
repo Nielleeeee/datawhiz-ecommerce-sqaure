@@ -48,7 +48,7 @@ export const getRelatedProducts = async (
   } catch (error) {
     return {
       status: false,
-      error: error instanceof Error ? error : new Error("Unknown error"),
+      error: error instanceof Error ? error : new Error("Unknown error"), data: null,
     };
   }
 };
