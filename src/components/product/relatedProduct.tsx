@@ -1,22 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-
-// Function to shuffle an array
-function shuffleArray(array: any[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+import { CatalogObject } from "square";
 
 export default function RelatedProduct({
   relatedProductsData,
 }: {
-  relatedProductsData: any[];
+  relatedProductsData: {
+    itemData: CatalogObject;
+    imageData: CatalogObject | null | undefined;
+  }[];
 }) {
-  const displayedProducts = shuffleArray([...relatedProductsData]).slice(0, 4);
-
   return (
     <section className=" px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
       <div className="flex justify-between">
@@ -30,34 +23,61 @@ export default function RelatedProduct({
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-        {displayedProducts.map((relatedProduct, index: number) => (
-          <Link
-            href={`/shop/${relatedProduct.permalink}`}
-            key={index}
-            className="group relative"
-          >
-            <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none lg:h-80">
-              <Image
-                alt={relatedProduct.name}
-                src={relatedProduct.image.url}
-                className="h-full w-full object-cover object-center lg:h-full lg:w-full transition scale-110 group-hover:scale-100"
-                width={300}
-                height={300}
-              />
-            </div>
+        {relatedProductsData.map((relatedProduct, index: number) => {
+          const { itemData, imageData } = relatedProduct;
+          const relatedProductName = itemData?.itemData?.name as string;
 
-            <div className="mt-4 flex justify-between">
-              <h3 className="text-sm text-gray-700">
-                <span aria-hidden="true" className="absolute inset-0" />
-                {relatedProduct.name}
-              </h3>
+          const permalink = relatedProductName
+            ? `${relatedProductName.toLowerCase().replace(/\s+/g, "-")}-${
+                itemData.id
+              }`
+            : null;
 
-              <p className="text-sm font-medium text-gray-900">
-                {relatedProduct.price.formatted_with_symbol}
-              </p>
-            </div>
-          </Link>
-        ))}
+          const relatedProductPrice =
+            itemData.itemData!.variations?.[0]?.itemVariationData?.priceMoney
+              ?.amount != null
+              ? new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency:
+                    itemData.itemData!.variations[0].itemVariationData
+                      .priceMoney.currency || "USD",
+                }).format(
+                  Number(
+                    itemData.itemData!.variations[0].itemVariationData
+                      .priceMoney.amount
+                  ) / 100
+                )
+              : "Price not available";
+
+          return (
+            <Link
+              href={`/shop/${permalink}`}
+              key={index}
+              className="group relative"
+            >
+              <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none lg:h-80">
+                <Image
+                  alt={relatedProductName}
+                  src={`${imageData?.imageData?.url}`}
+                  className="h-full w-full object-cover object-center lg:h-full lg:w-full transition scale-110 group-hover:scale-100"
+                  width={300}
+                  height={300}
+                />
+              </div>
+
+              <div className="mt-4 flex justify-between">
+                <h3 className="text-sm text-gray-700">
+                  <span aria-hidden="true" className="absolute inset-0" />
+                  {relatedProductName}
+                </h3>
+
+                <p className="text-sm font-medium text-gray-900">
+                  {relatedProductPrice}
+                </p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
