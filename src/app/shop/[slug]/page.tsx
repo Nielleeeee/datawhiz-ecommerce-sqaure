@@ -17,16 +17,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const itemCategory = productData?.category?.categoryData;
   const variationStocks = productData?.variationStocks;
 
-  let relatedProductsData;
-
-  if (itemData?.reportingCategory) {
-    const relatedProduct = await getRelatedProducts(
-      productData?.item?.id!,
-      itemData?.reportingCategory?.id!
-    );
-
-    // push to relatedProductsData
-  }
+  const relatedProductsData = itemData?.reportingCategory
+    ? await getRelatedProducts(
+        productData?.item?.id!,
+        itemData?.reportingCategory?.id!
+      )
+    : null;
 
   if (
     !product.status ||
@@ -37,10 +33,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
   ) {
     notFound();
   }
-
-  // const hasRelatedProducts =
-  //   Array.isArray(productData.related_products) &&
-  //   productData.related_products.length > 0;
 
   return (
     <main className="pt-16 flex items-center justify-center">
@@ -57,9 +49,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
           variationStocks={variationStocks}
         />
 
-        {/* {hasRelatedProducts && (
-          <RelatedProduct relatedProductsData={productData.related_products} />
-        )} */}
+        {relatedProductsData && relatedProductsData.data && (
+          <RelatedProduct relatedProductsData={relatedProductsData.data} />
+        )}
       </section>
     </main>
   );
