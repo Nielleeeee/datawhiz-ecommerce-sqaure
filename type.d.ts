@@ -17,8 +17,16 @@ interface Cart {
 
 interface CartContextType {
   cart: Cart | null;
-  addToCart: (item: any) => void;
-  updateCart: (item: any) => void;
-  removeToCart: (item: any) => void;
-  emptyCart: () => void;
+  addToCart: (newItem: CartItem, quantity: number) => {
+    status: boolean;
+    cart?: Cart;
+    error?: any;
+  };
+  updateCart: ({ id, quantity }: CartItem) => {
+    status: boolean;
+    cart?: Cart;
+    error?: any;
+  };
+  removeToCart: (id: string) => { status: boolean; cart?: Cart; error?: any };
+  emptyCart: () => { status: boolean; cart?: Cart; error?: any };
 }
