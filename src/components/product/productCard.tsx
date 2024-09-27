@@ -6,6 +6,8 @@ import Image from "next/image";
 import { toast } from "react-toastify";
 import { CatalogItem } from "square/dist/types/models/catalogItem";
 import { CatalogObject } from "square";
+import { useCart } from "@/lib/cartContext";
+import { CartItem } from "../../../type";
 
 export default function ProductCard({
   itemID,
@@ -17,29 +19,14 @@ export default function ProductCard({
   image?: CatalogObject;
 }) {
   const [loading, setLoading] = useState(false);
-
-  // const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
-  //   event.stopPropagation();
-  //   event.preventDefault();
-
-  //   try {
-  //     setLoading(true);
-
-  //     const response = addToCart(itemData.id, 1);
-
-  //     await toast
-  //       .promise(response, {
-  //         pending: "Adding to Cart... 🙄",
-  //         success: "Item Added to Cart. 👌",
-  //         error: "Something went wrong. 😱",
-  //       })
-  //       .then(() => setLoading(false));
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+  const { addToCart } = useCart();
 
   const imageUrl = image?.imageData?.url;
+
+  const rawPrice = itemData.variations?.[0]?.itemVariationData?.priceMoney
+    ?.amount
+    ? Number(itemData.variations[0].itemVariationData.priceMoney.amount) / 100
+    : null;
 
   const itemPrice =
     itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount != null
@@ -57,6 +44,36 @@ export default function ProductCard({
   const permalink = itemData.name
     ? `${itemData.name.toLowerCase().replace(/\s+/g, "-")}-${itemID}`
     : null;
+
+  const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const cartItem: CartItem = {
+        id: itemID,
+        name: itemData.name ?? "",
+        price: rawPrice ?? 0,
+        quantity: 1,
+        image: imageUrl ?? "",
+        variantID: itemData?.variations?.[0]?.id!,
+      };
+
+      const response = addToCart(cartItem, 1);
+
+      if (response.status) {
+        toast.success("Item Added to Cart. 👌");
+      } else {
+        toast.error("Something went wrong. 😱");
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <Link
@@ -85,7 +102,7 @@ export default function ProductCard({
 
         <form className="mt-4">
           <button
-            // onClick={handleAddToCartClick}
+            onClick={handleAddToCartClick}
             disabled={loading}
             className="block w-full rounded bg-blue-500 disabled:bg-gray-500 text-white p-4 text-sm font-medium transition hover:scale-105"
           >
