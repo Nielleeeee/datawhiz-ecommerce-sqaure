@@ -13,40 +13,118 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (cart) {
       setCartCookie(cart);
     }
+
+    console.log(cart);
   }, [cart]);
 
-  const addToCart = (newItem: CartItem) => {
-    let updatedCart: Cart = cart
-      ? { ...cart }
-      : { items: [], totalItems: 0, totalPrice: 0 };
+  const addToCart = (newItem: CartItem, quantity: number) => {
+    try {
+      let updatedCart: Cart = cart
+        ? { ...cart }
+        : { items: [], totalItems: 0, totalPrice: 0 };
 
-    const existingItem = updatedCart.items.find(
-      (item) => item.id === newItem.id
-    );
+      const existingItem = updatedCart.items.find(
+        (item) => item.id === newItem.id
+      );
 
-    if (existingItem) {
-      existingItem.quantity += newItem.quantity;
-    } else {
-      updatedCart.items.push(newItem);
+      if (existingItem) {
+        existingItem.quantity += newItem.quantity;
+      } else {
+        updatedCart.items.push(newItem);
+      }
+
+      updatedCart.totalItems = updatedCart.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+      updatedCart.totalPrice = updatedCart.items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      setCart(updatedCart);
+
+      return { status: true, cart: updatedCart };
+    } catch (error) {
+      console.error("Error Adding to cart: ", error);
+      return { status: false, error };
     }
-
-    updatedCart.totalItems = updatedCart.items.reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    );
-    updatedCart.totalPrice = updatedCart.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
-    setCart(updatedCart);
   };
 
-  const updateCart = () => {};
+  const updateCart = ({ id, quantity }: CartItem) => {
+    try {
+      if (!cart) {
+        return { status: false, error: "Cart not found" };
+      }
 
-  const removeToCart = () => {};
+      const updatedCart: Cart = {
+        ...cart,
+        items: cart.items.map((item) =>
+          item.id === id ? { ...item, quantity } : item
+        ),
+      };
 
-  const emptyCart = () => {};
+      updatedCart.totalItems = updatedCart.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+
+      updatedCart.totalPrice = updatedCart.items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      setCart(updatedCart);
+
+      return { status: true, cart: updatedCart };
+    } catch (error) {
+      console.error("Error updating cart: ", error);
+      return { status: false, error };
+    }
+  };
+
+  const removeToCart = (id: string) => {
+    try {
+      let updatedCart: Cart = cart
+        ? { ...cart }
+        : { items: [], totalItems: 0, totalPrice: 0 };
+
+      updatedCart.items = updatedCart.items.filter((item) => item.id !== id);
+
+      updatedCart.totalItems = updatedCart.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+
+      updatedCart.totalPrice = updatedCart.items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      setCart(updatedCart);
+
+      return { status: true, cart: updatedCart };
+    } catch (error) {
+      console.error("Error updating cart: ", error);
+      return { status: false, error };
+    }
+  };
+
+  const emptyCart = () => {
+    try {
+      const clearedCart = { items: [], totalItems: 0, totalPrice: 0 };
+
+      setCart(clearedCart);
+
+      return {
+        status: true,
+        cart: clearedCart,
+      };
+    } catch (error) {
+      console.error("Error emptying cart: ", error);
+      return { status: false, error };
+    }
+  };
 
   return (
     <CartContext.Provider
