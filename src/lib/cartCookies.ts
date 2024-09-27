@@ -1,15 +1,15 @@
-"use server";
+"use client";
 
-import { cookies } from "next/headers";
+import Cookies from "js-cookie";
 import { Cart } from "../../type";
 
-export const setCartCookie = (cardData: Cart) => {
+export const setCartCookie = (cartData: Cart) => {
   const maxAge = 7 * 24 * 60 * 60;
-  cookies().set("cart", JSON.stringify(cardData), { maxAge });
+  Cookies.set("cart", JSON.stringify(cartData), { expires: maxAge / 86400 });
 };
 
 export const getCartCookie = () => {
-  const cartCookie = cookies().get("cart");
+  const cartCookie = Cookies.get("cart");
 
-  return cartCookie ? (JSON.parse(cartCookie.value) as Cart) : null;
+  return cartCookie ? (JSON.parse(cartCookie) as Cart) : null;
 };
