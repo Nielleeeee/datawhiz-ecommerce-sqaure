@@ -17,7 +17,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     console.log(cart);
   }, [cart]);
 
-  const addToCart = (newItem: CartItem, quantity: number) => {
+  const addToCart = (newItem: CartItem) => {
     try {
       let updatedCart: Cart = cart
         ? { ...cart }
