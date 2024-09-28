@@ -13,20 +13,27 @@ export default function ProductCard({
   itemID,
   itemData,
   image,
+  variationStocks
 }: {
   itemID: string;
   itemData: CatalogItem;
   image?: CatalogObject;
+  variationStocks: Record<string, number>;
 }) {
   const [loading, setLoading] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
+
+  const itemOnCart = cart?.items.find(
+    (item) => item.variantID === itemData?.variations?.[0]?.id!
+  );
+
+  const itemOnCartQuantity = itemOnCart?.quantity ?? 0;
 
   const imageUrl = image?.imageData?.url;
 
-  const rawPrice = itemData.variations?.[0]?.itemVariationData?.priceMoney
-    ?.amount
-    ? Number(itemData.variations[0].itemVariationData.priceMoney.amount) / 100
-    : null;
+  const rawPrice = Number(
+    itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount
+  );
 
   const itemPrice =
     itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount != null
@@ -45,31 +52,37 @@ export default function ProductCard({
     ? `${itemData.name.toLowerCase().replace(/\s+/g, "-")}-${itemID}`
     : null;
 
-  const handleAddToCartClick = async (event: MouseEvent<HTMLButtonElement>) => {
+  const availableStock = variationStocks[itemData.variations![0].id];
+
+  const handleAddToCartClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     event.preventDefault();
 
     try {
-      setLoading(true);
+      if (itemOnCartQuantity < availableStock) {
+        setLoading(true);
 
-      const cartItem: CartItem = {
-        id: itemID,
-        name: itemData.name ?? "",
-        price: rawPrice ?? 0,
-        quantity: 1,
-        image: imageUrl ?? "",
-        variantID: itemData?.variations?.[0]?.id!,
-      };
+        const cartItem: CartItem = {
+          id: itemID,
+          name: itemData.name ?? "",
+          price: rawPrice,
+          quantity: 1,
+          image: imageUrl ?? "",
+          variantID: itemData?.variations?.[0]?.id!,
+        };
 
-      const response = addToCart(cartItem, 1);
+        const response = addToCart(cartItem);
 
-      if (response.status) {
-        toast.success("Item Added to Cart. 👌");
+        if (response.status) {
+          toast.success("Item Added to Cart. 👌");
+        } else {
+          toast.error("Something went wrong. 😱");
+        }
+
+        setLoading(false);
       } else {
-        toast.error("Something went wrong. 😱");
+        toast.error("Insufficient stock available. 😞");
       }
-
-      setLoading(false);
     } catch (error) {
       console.error(error);
     }
