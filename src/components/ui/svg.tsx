@@ -10,20 +10,17 @@ export const Minus = () => {
     >
       <path
         d="M16.5 11H5.5"
-        stroke=""
         strokeWidth="1.6"
         strokeLinecap="round"
       />
       <path
         d="M16.5 11H5.5"
-        stroke=""
         strokeOpacity="0.2"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
       <path
         d="M16.5 11H5.5"
-        stroke=""
         strokeOpacity="0.2"
         strokeWidth="1.6"
         strokeLinecap="round"
@@ -44,20 +41,17 @@ export const Add = () => {
     >
       <path
         d="M11 5.5V16.5M16.5 11H5.5"
-        stroke="#9CA3AF"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
       <path
         d="M11 5.5V16.5M16.5 11H5.5"
-        stroke="black"
         strokeOpacity="0.2"
         strokeWidth="1.6"
         strokeLinecap="round"
       />
       <path
         d="M11 5.5V16.5M16.5 11H5.5"
-        stroke="black"
         strokeOpacity="0.2"
         strokeWidth="1.6"
         strokeLinecap="round"
