@@ -6,6 +6,8 @@ import { CatalogItem, CatalogObject } from "square";
 export default async function Shop() {
   const { products } = await getProducts();
 
+  // console.log("Products: ", products);
+
   const ProductList = () => {
     if (products && products.length > 0) {
       return (
@@ -16,6 +18,7 @@ export default async function Shop() {
               itemID={product.id}
               itemData={product.itemData as CatalogItem}
               image={product.image as CatalogObject}
+              variationStocks={{ "123123": 10 }} //Change this to the variation stocks
             />
           ))}
         </div>
