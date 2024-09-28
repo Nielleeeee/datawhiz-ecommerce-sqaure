@@ -9,6 +9,8 @@ import Link from "next/link";
 // import { generateCartCheckoutToken } from "@/app/action/checkout/checkout";
 import { useRouter } from "next/navigation";
 import { CatalogItem, CatalogObject, CatalogCategory } from "square";
+import { useCart } from "@/lib/cartContext";
+import { CartItem } from "../../../type";
 
 export default function ProductDetails({
   itemID,
@@ -23,9 +25,21 @@ export default function ProductDetails({
   category?: CatalogCategory | null;
   variationStocks: Record<string, number>;
 }) {
+  const { addToCart, cart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  
+
+  const itemOnCart = cart?.items.find(
+    (item) => item.variantID === itemData?.variations?.[0]?.id!
+  );
+  
+  const itemOnCartQuantity = itemOnCart?.quantity ?? 0;
+
+  const rawPrice = Number(
+    itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount
+  );
 
   const itemPrice =
     itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount != null
@@ -40,49 +54,58 @@ export default function ProductDetails({
         )
       : "Price not available";
 
-  // const addQuantity = () => {
-  //   setQuantity(
-  //     quantity < productData.inventory.available
-  //       ? quantity + 1
-  //       : productData.inventory.available
-  //   );
-  // };
+  const availableStock = variationStocks[itemData.variations![0].id];
 
-  // const minusQuantity = () => {
-  //   setQuantity(quantity > 1 ? quantity - 1 : 1);
-  // };
+  const addQuantity = () => {
+    setQuantity(quantity < availableStock ? quantity + 1 : availableStock);
+  };
 
-  // const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = parseInt(e.target.value, 10);
-  //   if (isNaN(value) || value < 1) {
-  //     setQuantity(1);
-  //   } else if (value > productData.inventory.available) {
-  //     setQuantity(productData.inventory.available);
-  //   } else {
-  //     setQuantity(value);
-  //   }
-  // };
+  const minusQuantity = () => {
+    setQuantity(quantity > 1 ? quantity - 1 : 1);
+  };
 
-  // const handleAddToCartClick = async () => {
-  //   try {
-  //     if (quantity > 1 && quantity <= productData.inventory.available) {
-  //       setLoading(true);
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (isNaN(value) || value < 1) {
+      setQuantity(1);
+    } else if (value > availableStock) {
+      setQuantity(availableStock);
+    } else {
+      setQuantity(value);
+    }
+  };
 
-  //       const response = addToCart(productData.id, quantity);
+  const handleAddToCartClick = () => {
+    try {
+      let addToCartItem: CartItem = {
+        id: itemID,
+        name: itemData.name ?? "",
+        price: rawPrice,
+        quantity: quantity,
+        image: image?.imageData?.url ?? "",
+        variantID: itemData?.variations?.[0]?.id!,
+      };
 
-  //       await toast.promise(response, {
-  //         pending: "Adding to Cart... 🙄",
-  //         success: "Item Added to Cart. 👌",
-  //         error: "Something went wrong. 😱",
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //     setQuantity(1);
-  //   }
-  // };
+      if (quantity > 0 && (itemOnCartQuantity + quantity) <= availableStock) {
+        setLoading(true);
+
+        const response = addToCart(addToCartItem);
+
+        if (response.status) {
+          toast.success("Item Added to Cart. 👌");
+        } else {
+          toast.error("Something went wrong. 😱");
+        }
+      } else {
+        toast.error("Insufficient stock available. 😞");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+      setQuantity(1);
+    }
+  };
 
   // const handleCheckout = async () => {
   //   try {
@@ -133,7 +156,7 @@ export default function ProductDetails({
                 </h6>
                 <div className="flex items-center gap-2">
                   <span className="pl-2 font-normal leading-7 text-gray-600">
-                    {variationStocks[itemData.variations![0].id]} Available
+                    {availableStock} Available
                   </span>
                 </div>
               </div>
@@ -170,9 +193,9 @@ export default function ProductDetails({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-8">
                 <div className="flex sm:items-center sm:justify-center w-full">
                   <button
-                    // onClick={minusQuantity}
+                    onClick={minusQuantity}
                     disabled={quantity <= 1}
-                    className="group py-4 px-6 border border-gray-400 rounded-l-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300 disabled:cursor-not-allowed"
+                    className="group py-4 px-6 border border-gray-400 rounded-l-full bg-white transition-all duration-300 hover:bg-gray-300 hover:shadow-sm hover:shadow-gray-300 disabled:bg-gray-200 disabled:cursor-not-allowed"
                   >
                     <Minus />
                   </button>
@@ -180,22 +203,22 @@ export default function ProductDetails({
                   <input
                     type="number"
                     value={quantity}
-                    // onChange={handleQuantityChange}
+                    onChange={handleQuantityChange}
                     className="remove-arrow font-semibold text-gray-900 cursor-pointer text-lg py-[13px] px-6 w-full sm:max-w-[118px] outline-0 border-y border-gray-400 bg-transparent placeholder:text-gray-900 text-center hover:bg-gray-50"
                     min={"1"}
-                    // max={productData.inventory.available}
+                    max={availableStock}
                   />
 
                   <button
-                    // onClick={addQuantity}
-                    // disabled={quantity >= productData.inventory.available}
-                    className="group py-4 px-6 border border-gray-400 rounded-r-full bg-white transition-all duration-300 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-300 disabled:cursor-not-allowed"
+                    onClick={addQuantity}
+                    disabled={quantity >= availableStock}
+                    className="group py-4 px-6 border border-gray-400 rounded-r-full bg-white transition-all duration-300 hover:bg-gray-300 hover:shadow-sm hover:shadow-gray-300 disabled:bg-gray-200 disabled:cursor-not-allowed"
                   >
                     <Add />
                   </button>
                 </div>
                 <button
-                  // onClick={handleAddToCartClick}
+                  onClick={handleAddToCartClick}
                   disabled={loading}
                   className="group py-4 px-5 rounded-full bg-indigo-200 disabled:bg-gray-200 text-indigo-600 font-semibold text-lg w-full flex items-center justify-center gap-2 transition-all duration-500 hover:bg-indigo-100"
                 >
