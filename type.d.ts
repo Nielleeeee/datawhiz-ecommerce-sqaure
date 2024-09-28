@@ -17,7 +17,7 @@ interface Cart {
 
 interface CartContextType {
   cart: Cart | null;
-  addToCart: (newItem: CartItem, quantity: number) => {
+  addToCart: (newItem: CartItem) => {
     status: boolean;
     cart?: Cart;
     error?: any;
