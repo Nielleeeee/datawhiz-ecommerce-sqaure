@@ -30,3 +30,7 @@ interface CartContextType {
   removeToCart: (id: string) => { status: boolean; cart?: Cart; error?: any };
   emptyCart: () => { status: boolean; cart?: Cart; error?: any };
 }
+
+interface InventoryCount {
+  [key: string]: number | undefined;
+}
