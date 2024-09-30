@@ -13,12 +13,12 @@ export default function ProductCard({
   itemID,
   itemData,
   image,
-  variationStocks
+  availableStock,
 }: {
   itemID: string;
   itemData: CatalogItem;
   image?: CatalogObject;
-  variationStocks: Record<string, number>;
+  availableStock: number;
 }) {
   const [loading, setLoading] = useState(false);
   const { addToCart, cart } = useCart();
@@ -51,8 +51,6 @@ export default function ProductCard({
   const permalink = itemData.name
     ? `${itemData.name.toLowerCase().replace(/\s+/g, "-")}-${itemID}`
     : null;
-
-  const availableStock = variationStocks[itemData.variations![0].id];
 
   const handleAddToCartClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
