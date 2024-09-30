@@ -6,21 +6,23 @@ import { CatalogItem, CatalogObject } from "square";
 export default async function Shop() {
   const { products } = await getProducts();
 
-  // console.log("Products: ", products);
-
   const ProductList = () => {
     if (products && products.length > 0) {
       return (
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              itemID={product.id}
-              itemData={product.itemData as CatalogItem}
-              image={product.image as CatalogObject}
-              variationStocks={{ "123123": 10 }} //Change this to the variation stocks
-            />
-          ))}
+          {products.map((product) => {
+            const availableStock = product.itemData?.variations?.[0]?.stockData as number;
+
+            return (
+              <ProductCard
+                key={product.id}
+                itemID={product.id}
+                itemData={product.itemData as CatalogItem}
+                image={product.image as CatalogObject}
+                availableStock={availableStock}
+              />
+            )
+          } )}
         </div>
       );
     } else {
