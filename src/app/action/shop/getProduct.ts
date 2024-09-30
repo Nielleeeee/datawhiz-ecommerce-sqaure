@@ -1,6 +1,7 @@
 "use server";
 
 import squareClient from "@/lib/square";
+import { InventoryCount } from "../../../../type";
 
 export const getProducts = async () => {
   try {
@@ -9,7 +10,7 @@ export const getProducts = async () => {
     const products = await catalogApi.listCatalog("", "ITEM");
 
     if (
-      products.result &&  
+      products.result &&
       products.result.objects &&
       products.result.objects.length > 0
     ) {
@@ -23,10 +24,15 @@ export const getProducts = async () => {
           catalogObjectIds,
         });
 
-      console.log(
-        "Inventory Count: ",
-        batchRetrieveInventoryCounts.result.counts
-      );
+      const inventoryCounts: InventoryCount =
+        batchRetrieveInventoryCounts.result.counts!.reduce(
+          (acc, count) =>
+            ({
+              ...acc,
+              [count.catalogObjectId!]: count.quantity,
+            } as InventoryCount),
+          {} as InventoryCount
+        );
 
       const productImages = await Promise.all(
         products.result.objects.map(async (product) => {
@@ -45,13 +51,27 @@ export const getProducts = async () => {
         })
       );
 
-      const productWithImages = products.result.objects.map(
+      const productWithImagesAndStock = products.result.objects.map(
         (product, index) => {
-          return { ...product, image: productImages[index] };
+          return {
+            ...product,
+            image: productImages[index],
+            itemData: {
+              ...product.itemData,
+              variations: product.itemData?.variations?.map((variation) => ({
+                ...variation,
+                stockData: inventoryCounts[variation.id] ?? 0, // Attach stock data here
+              })),
+            },
+          };
         }
       );
 
-      return { status: true, error: false, products: productWithImages };
+      return {
+        status: true,
+        error: false,
+        products: productWithImagesAndStock,
+      };
     } else {
       return { status: false, error: "No items found", products: [] };
     }
@@ -60,18 +80,3 @@ export const getProducts = async () => {
     return { status: false, error: error as any };
   }
 };
-
-// Get batch inventory counts
-// try {
-//   const response = await client.inventoryApi.batchRetrieveInventoryCounts({
-//     catalogObjectIds: [
-//       'someid1',
-//       'someid2',
-//       'someid3'
-//     ]
-//   });
-
-//   console.log(response.result);
-// } catch(error) {
-//   console.log(error);
-// }
