@@ -22,12 +22,12 @@ interface CartContextType {
     cart?: Cart;
     error?: any;
   };
-  updateCart: ({ id, quantity }: CartItem) => {
+  updateCart: (variantID: string, quantity: number) => {
     status: boolean;
     cart?: Cart;
     error?: any;
   };
-  removeToCart: (id: string) => { status: boolean; cart?: Cart; error?: any };
+  removeToCart: (variantID: string) => { status: boolean; cart?: Cart; error?: any };
   emptyCart: () => { status: boolean; cart?: Cart; error?: any };
 }
 
