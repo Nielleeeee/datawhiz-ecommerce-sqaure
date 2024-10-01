@@ -51,7 +51,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const updateCart = ({ id, quantity }: CartItem) => {
+  const updateCart = (variantID: string, quantity: number) => {
     try {
       if (!cart) {
         return { status: false, error: "Cart not found" };
@@ -60,7 +60,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const updatedCart: Cart = {
         ...cart,
         items: cart.items.map((item) =>
-          item.id === id ? { ...item, quantity } : item
+          item.variantID === variantID ? { ...item, quantity } : item
         ),
       };
 
@@ -83,13 +83,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const removeToCart = (id: string) => {
+  const removeToCart = (variantID: string) => {
     try {
       let updatedCart: Cart = cart
         ? { ...cart }
         : { items: [], totalItems: 0, totalPrice: 0 };
 
-      updatedCart.items = updatedCart.items.filter((item) => item.id !== id);
+      updatedCart.items = updatedCart.items.filter((item) => item.variantID !== variantID);
 
       updatedCart.totalItems = updatedCart.items.reduce(
         (sum, item) => sum + item.quantity,
