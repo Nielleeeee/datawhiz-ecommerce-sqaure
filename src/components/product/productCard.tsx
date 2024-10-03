@@ -31,9 +31,9 @@ export default function ProductCard({
 
   const imageUrl = image?.imageData?.url;
 
-  const rawPrice = Number(
-    itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount
-  );
+  const price = itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount;
+
+  const rawPrice = Number(price) / 100; // remove last 2 digit in raw price
 
   const itemPrice =
     itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount != null
