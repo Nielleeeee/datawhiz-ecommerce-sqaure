@@ -9,23 +9,61 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cartContext";
 import { CartItem } from "../../../type";
+import { getBatchInventoryCount } from "@/app/action/shop/getInventoryCount";
+import { InventoryCount } from "../../../type";
 
 export default function CartItems() {
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [updatingItemID, setUpdatingItemID] = useState<string | null>(null);
+  const [inventoryCounts, setInventoryCounts] = useState<InventoryCount>({});
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
-  const { cart, addToCart, updateCart, removeToCart, emptyCart } = useCart();
+  const { cart, updateCart, removeToCart, emptyCart } = useCart();
 
   const router = useRouter();
 
+  // Fetching inventory count
+  useEffect(() => {
+    const fetchInventoryCounts = async () => {
+      try {
+        if (cart && cart.items.length > 0) {
+          const catalogObjectIds = cart?.items.map(
+            (item: CartItem) => item.variantID
+          );
+
+          const inventoryCountsResponse = await getBatchInventoryCount(
+            catalogObjectIds
+          );
+
+          const inventoryCountsData: InventoryCount =
+            inventoryCountsResponse.result.counts!.reduce(
+              (acc, count) =>
+                ({
+                  ...acc,
+                  [count.catalogObjectId!]: count.quantity,
+                } as InventoryCount),
+              {} as InventoryCount
+            );
+
+          setInventoryCounts(inventoryCountsData);
+        }
+      } catch (error) {
+        console.error("Error fetching inventory counts: ", error);
+        toast.error("Something went wrong. 😱");
+      }
+    };
+
+    fetchInventoryCounts();
+  }, [cart]);
+
+  // Initializing quantities
   useEffect(() => {
     if (cart) {
       const initialQuantities: { [key: string]: number } = {};
 
       cart.items.forEach((item) => {
-        initialQuantities[item.id] = item.quantity;
+        initialQuantities[item.variantID] = item.quantity;
       });
 
       setQuantities(initialQuantities);
@@ -53,62 +91,71 @@ export default function CartItems() {
   //   }
   // };
 
-  // const handleQuantityChange = (lineID: string, newQuantity: number) => {
-  //   if (debounceTimeout.current) {
-  //     clearTimeout(debounceTimeout.current);
-  //   }
+  const handleQuantityChange = (variantID: string, newQuantity: number) => {
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
 
-  //   if (newQuantity > 0) {
-  //     setQuantities((prevQuantities) => ({
-  //       ...prevQuantities,
-  //       [lineID]: newQuantity,
-  //     }));
+    const availableInventory = inventoryCounts[variantID] ?? 0;
 
-  //     setUpdatingItemID(lineID);
+    if (newQuantity > 0 && newQuantity <= availableInventory) {
+      setQuantities((prevQuantities) => ({
+        ...prevQuantities,
+        [variantID]: newQuantity,
+      }));
 
-  //     requestAnimationFrame(() => {
-  //       if (inputRefs.current[lineID]) {
-  //         inputRefs.current[lineID]?.focus();
-  //       }
-  //     });
+      setUpdatingItemID(variantID);
 
-  //     debounceTimeout.current = setTimeout(async () => {
-  //       updateQuantity(lineID, newQuantity);
-  //     }, 800);
-  //   }
-  // };
+      requestAnimationFrame(() => {
+        if (inputRefs.current[variantID]) {
+          inputRefs.current[variantID]?.focus();
+        }
+      });
 
-  // const updateQuantity = async (lineID: string, quantity: number) => {
-  //   try {
-  //     setIsUpdating(true);
+      debounceTimeout.current = setTimeout(async () => {
+        updateQuantity(variantID, newQuantity);
+      }, 800);
+    } else {
+      setUpdatingItemID(null);
+      setIsUpdating(false);
 
-  //     const response = updateCart(lineID, quantity);
+      debounceTimeout.current = setTimeout(async () => {
+        toast.error("Insufficient stock available. 😞");
+      }, 300);
+    }
+  };
 
-  //     await toast.promise(response, {
-  //       pending: "Updating Cart... 🙄",
-  //       success: "Cart Updated. 👌",
-  //       error: "Something went wrong. 😱",
-  //     });
-  //   } catch (error) {
-  //     throw Error(`Error: ${error}`);
-  //   } finally {
-  //     setIsUpdating(false);
-  //     setUpdatingItemID(null);
-  //   }
-  // };
+  const updateQuantity = async (variantID: string, quantity: number) => {
+    try {
+      setIsUpdating(true);
 
-  // const handleEmptyCart = async () => {
-  //   const response = emptyCart();
+      const response = updateCart(variantID, quantity);
 
-  //   await toast.promise(response, {
-  //     pending: "Clearing cart... 🙄",
-  //     success: "Cart emptied. 👌",
-  //     error: "Something went wrong. 😱",
-  //   });
-  // };
+      if (response.status) {
+        toast.success("Cart item updated. 👌");
+      } else {
+        toast.error("Something went wrong. 😱");
+      }
+    } catch (error) {
+      throw Error(`Error: ${error}`);
+    } finally {
+      setIsUpdating(false);
+      setUpdatingItemID(null);
+    }
+  };
 
-  const handleRemoveToCart = async (lineID: string) => {
-    const response = removeToCart(lineID);
+  const handleEmptyCart = async () => {
+    const response = emptyCart();
+
+    if (response.status) {
+      toast.success("Cart emptied. 👌");
+    } else {
+      toast.error("Something went wrong. 😱");
+    }
+  };
+
+  const handleRemoveToCart = (variantID: string) => {
+    const response = removeToCart(variantID);
 
     if (response.status) {
       toast.success("Item Removed from Cart. 👌");
@@ -122,12 +169,18 @@ export default function CartItems() {
       return (
         <ul className="space-y-4">
           {cart.items.map((item: CartItem, index: number) => {
-            const itemQuantity = quantities[item.id];
+            const itemQuantity = quantities[item.variantID];
             const isItemUpdating =
-              updatingItemID !== null && updatingItemID !== item.id;
+              updatingItemID !== null && updatingItemID !== item.variantID;
             const permalink = item.name
               ? `${item.name.toLowerCase().replace(/\s+/g, "-")}-${item.id}`
               : null;
+            const availableInventory = inventoryCounts[item.variantID] ?? 0;
+            const price = new Intl.NumberFormat('en-US', {
+              style: 'decimal',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }).format(item.price); 
 
             return (
               <li
@@ -151,8 +204,8 @@ export default function CartItems() {
 
                     <dl className="mt-0.5 space-y-px text-[10px] text-gray-600">
                       <div>
-                        <dt className="inline">Price:</dt>
-                        <dd className="inline">{item.price}</dd>
+                        <dt className="inline">Price: </dt>
+                        <dd className="inline">${price}</dd>
                       </div>
                     </dl>
                   </div>
@@ -168,9 +221,9 @@ export default function CartItems() {
                     <button
                       type="button"
                       className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75 disabled:cursor-not-allowed"
-                      // onClick={() =>
-                      //   handleQuantityChange(item.id, itemQuantity - 1)
-                      // }
+                      onClick={() =>
+                        handleQuantityChange(item.variantID, itemQuantity - 1)
+                      }
                       disabled={
                         itemQuantity <= 1 || isUpdating || isItemUpdating
                       }
@@ -185,12 +238,13 @@ export default function CartItems() {
                       type="number"
                       value={itemQuantity}
                       id={`quantity-${index}`}
-                      // onChange={(e) =>
-                      //   handleQuantityChange(
-                      //     item.id,
-                      //     parseInt(e.target.value, 10)
-                      //   )
-                      // }
+                      onChange={(e) =>
+                        handleQuantityChange(
+                          item.variantID,
+                          parseInt(e.target.value, 10)
+                        )
+                      }
+                      readOnly
                       disabled={isUpdating || isItemUpdating}
                       className="remove-arrow h-8 sm:h-10 w-8 sm:w-16 border-transparent text-center [-moz-appearance:_textfield] text-xs sm:text-sm [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none disabled:cursor-not-allowed"
                     />
@@ -198,17 +252,21 @@ export default function CartItems() {
                     <button
                       type="button"
                       className="flex items-center justify-center h-8 w-8 sm:w-10 leading-10 text-gray-600 transition hover:opacity-75 disabled:cursor-not-allowed"
-                      // onClick={() =>
-                      //   handleQuantityChange(item.id, itemQuantity + 1)
-                      // }
-                      disabled={isUpdating || isItemUpdating}
+                      onClick={() =>
+                        handleQuantityChange(item.variantID, itemQuantity + 1)
+                      }
+                      disabled={
+                        isUpdating ||
+                        isItemUpdating ||
+                        itemQuantity >= availableInventory
+                      }
                     >
                       &#43;
                     </button>
                   </div>
 
                   <button
-                    onClick={() => handleRemoveToCart(item.id)}
+                    onClick={() => handleRemoveToCart(item.variantID)}
                     disabled={isUpdating}
                     className="text-gray-600 transition disabled:text-gray-400 hover:text-red-600 disabled:cursor-not-allowed"
                   >
@@ -234,88 +292,96 @@ export default function CartItems() {
     }
   };
 
-  // const CheckoutSection = () => {
-  //   if (cart && cart.line_items.length > 0) {
-  //     return (
-  //       <div className="flex flex-col">
-  //         <button
-  //           type="button"
-  //           onClick={handleEmptyCart}
-  //           className="flex justify-center items-center gap-2 ml-auto mt-8 bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded-md text-sm"
-  //         >
-  //           Empty Cart <Trash />
-  //         </button>
+  const CheckoutSection = () => {
+    if (cart && cart.items.length > 0) {
+      const subtotal = new Intl.NumberFormat("en-US", {
+        style: "decimal",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(cart.totalPrice);
 
-  //         <div className="mt-8 flex justify-end border-t border-gray-100 pt-8">
-  //           <div className="w-screen max-w-lg space-y-4">
-  //             <dl className="space-y-0.5 text-sm text-gray-700">
-  //               <div className="flex justify-between">
-  //                 <dt>Subtotal</dt>
-  //                 <dd>{cart?.subtotal.formatted_with_symbol}</dd>
-  //               </div>
+      return (
+        <div className="flex flex-col">
+          <button
+            type="button"
+            onClick={handleEmptyCart}
+            className="flex justify-center items-center gap-2 ml-auto mt-8 bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded-md text-sm"
+          >
+            Empty Cart <Trash />
+          </button>
 
-  //               <div className="flex justify-between">
-  //                 <dt>VAT</dt>
-  //                 <dd>0</dd>
-  //               </div>
+          <div className="mt-8 flex justify-end border-t border-gray-100 pt-8">
+            <div className="w-screen max-w-lg space-y-4">
+              <dl className="space-y-0.5 text-sm text-gray-700">
+                <div className="flex justify-between">
+                  <dt>Subtotal</dt>
+                  <dd>$ {subtotal}</dd>
+                </div>
 
-  //               {/* <div className="flex justify-between">
-  //             <dt>Discount</dt>
-  //             <dd>-£20</dd>
-  //           </div> */}
+                <div className="flex justify-between">
+                  <dt>VAT</dt>
+                  <dd>0.00</dd>
+                </div>
 
-  //               <div className="flex justify-between !text-base font-medium">
-  //                 <dt>Total</dt>
-  //                 <dd>{cart?.subtotal.formatted_with_symbol}</dd>
-  //               </div>
-  //             </dl>
+                {/* <div className="flex justify-between">
+              <dt>Discount</dt>
+              <dd>-£20</dd>
+            </div> */}
 
-  //             {/* <div className="flex justify-end">
-  //           <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-indigo-700">
-  //             <svg
-  //               xmlns="http://www.w3.org/2000/svg"
-  //               fill="none"
-  //               viewBox="0 0 24 24"
-  //               strokeWidth="1.5"
-  //               stroke="currentColor"
-  //               className="-ms-1 me-1.5 h-4 w-4"
-  //             >
-  //               <path
-  //                 strokeLinecap="round"
-  //                 strokeLinejoin="round"
-  //                 d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"
-  //               />
-  //             </svg>
+                <div className="flex justify-between !text-base font-medium">
+                  <dt>Total</dt>
+                  <dd>$ {subtotal}</dd>
+                </div>
+              </dl>
 
-  //             <p className="whitespace-nowrap text-xs">2 Discounts Applied</p>
-  //           </span>
-  //         </div> */}
+              {/* <div className="flex justify-end">
+            <span className="inline-flex items-center justify-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-indigo-700">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="-ms-1 me-1.5 h-4 w-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"
+                />
+              </svg>
 
-  //             <div className="flex justify-end">
-  //               <button
-  //                 onClick={handleCheckout}
-  //                 disabled={!cart}
-  //                 className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
-  //               >
-  //                 Checkout
-  //               </button>
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     );
-  //   }
-  // };
+              <p className="whitespace-nowrap text-xs">2 Discounts Applied</p>
+            </span>
+          </div> */}
+
+              <div className="flex justify-end">
+                <button
+                  // onClick={handleCheckout}
+                  disabled={!cart}
+                  className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
+                >
+                  Checkout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
 
   if (!cart) {
     return <TruckLoading />;
   }
 
   return (
-    <div className="mx-auto max-w-3xl w-full">
-      <LineItems />
+    <>
+      <div className="mx-auto max-w-3xl w-full">
+        <LineItems />
 
-      {/* <CheckoutSection /> */}
-    </div>
+        <CheckoutSection />
+      </div>
+    </>
   );
 }
