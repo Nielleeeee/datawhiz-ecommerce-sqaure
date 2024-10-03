@@ -29,17 +29,16 @@ export default function ProductDetails({
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  
 
   const itemOnCart = cart?.items.find(
     (item) => item.variantID === itemData?.variations?.[0]?.id!
   );
-  
+
   const itemOnCartQuantity = itemOnCart?.quantity ?? 0;
 
-  const rawPrice = Number(
-    itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount
-  );
+  const price = itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount;
+
+  const rawPrice = Number(price) / 100;
 
   const itemPrice =
     itemData.variations?.[0]?.itemVariationData?.priceMoney?.amount != null
@@ -86,7 +85,7 @@ export default function ProductDetails({
         variantID: itemData?.variations?.[0]?.id!,
       };
 
-      if (quantity > 0 && (itemOnCartQuantity + quantity) <= availableStock) {
+      if (quantity > 0 && itemOnCartQuantity + quantity <= availableStock) {
         setLoading(true);
 
         const response = addToCart(addToCartItem);
