@@ -11,6 +11,8 @@ import { useCart } from "@/lib/cartContext";
 import { CartItem } from "../../../type";
 import { getBatchInventoryCount } from "@/app/action/shop/getInventoryCount";
 import { InventoryCount } from "../../../type";
+import { OrderLineItem } from "square";
+import { createPaymentLink } from "@/app/action/checkout/checkout";
 
 export default function CartItems() {
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -70,26 +72,40 @@ export default function CartItems() {
     }
   }, [cart]);
 
-  // const handleCheckout = async () => {
-  //   try {
-  //     if (cart) {
-  //       const token = generateCartCheckoutToken(cart.id, "cart");
+  const handleCheckout = async () => {
+    try {
+      if (cart) {
+        const lineItems: OrderLineItem[] = cart.items.map((item: CartItem) => ({
+          quantity: item.quantity.toString(),
+          catalogObjectId: item.variantID,
+          itemType: "ITEM",
+        }));
 
-  //       await toast
-  //         .promise(token, {
-  //           pending: "Checking out... 🙄",
-  //           success: "Redirecting. 👌",
-  //           error: "Something went wrong. 😱",
-  //         })
-  //         .then((token) => {
-  //           router.push(`/checkout?token=${token.id}`);
-  //         });
-  //     }
-  //   } catch (error) {
-  //     console.error("Handle Checkout Error: ", error);
-  //     throw Error;
-  //   }
-  // };
+        const checkoutLink = createPaymentLink(lineItems);
+
+        await toast
+          .promise(checkoutLink, {
+            pending: "Checking out... 🙄",
+            success: "Redirecting. 👌",
+            error: "Something went wrong. 😱",
+          })
+          .then((checkoutLink) => {
+            if (checkoutLink.status) {
+              emptyCart();
+              router.push(checkoutLink.paymentLink?.url ?? "");
+            } else {
+              console.error(
+                "Error creating payment link: ",
+                checkoutLink.error
+              );
+            }
+          });
+      }
+    } catch (error) {
+      console.error("Handle Checkout Error: ", error);
+      throw Error;
+    }
+  };
 
   const handleQuantityChange = (variantID: string, newQuantity: number) => {
     if (debounceTimeout.current) {
@@ -176,11 +192,11 @@ export default function CartItems() {
               ? `${item.name.toLowerCase().replace(/\s+/g, "-")}-${item.id}`
               : null;
             const availableInventory = inventoryCounts[item.variantID] ?? 0;
-            const price = new Intl.NumberFormat('en-US', {
-              style: 'decimal',
+            const price = new Intl.NumberFormat("en-US", {
+              style: "decimal",
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
-            }).format(item.price); 
+            }).format(item.price);
 
             return (
               <li
@@ -357,7 +373,7 @@ export default function CartItems() {
 
               <div className="flex justify-end">
                 <button
-                  // onClick={handleCheckout}
+                  onClick={handleCheckout}
                   disabled={!cart}
                   className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
                 >
