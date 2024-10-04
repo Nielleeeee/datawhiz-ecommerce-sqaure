@@ -6,9 +6,14 @@ import { useState } from "react";
 import { Minus, Add, Cart, Heart } from "@/components/ui/svg";
 import { toast } from "react-toastify";
 import Link from "next/link";
-// import { generateCartCheckoutToken } from "@/app/action/checkout/checkout";
+import { createPaymentLink } from "@/app/action/checkout/checkout";
 import { useRouter } from "next/navigation";
-import { CatalogItem, CatalogObject, CatalogCategory } from "square";
+import {
+  CatalogItem,
+  CatalogObject,
+  CatalogCategory,
+  OrderLineItem,
+} from "square";
 import { useCart } from "@/lib/cartContext";
 import { CartItem } from "../../../type";
 
@@ -106,24 +111,36 @@ export default function ProductDetails({
     }
   };
 
-  // const handleCheckout = async () => {
-  //   try {
-  //     const token = generateCartCheckoutToken(productData.id, "product_id");
+  const handleCheckout = async () => {
+    try {
+      const lineItems: OrderLineItem[] = [
+        {
+          quantity: quantity.toString(),
+          catalogObjectId: itemData.variations?.[0]?.id!,
+          itemType: "ITEM",
+        },
+      ];
 
-  //     await toast
-  //       .promise(token, {
-  //         pending: "Checking out... 🙄",
-  //         success: "Redirecting. 👌",
-  //         error: "Something went wrong. 😱",
-  //       })
-  //       .then((token) => {
-  //         router.push(`/checkout?token=${token.id}`);
-  //       });
-  //   } catch (error) {
-  //     console.error("Handle Checkout Error: ", error);
-  //     throw Error;
-  //   }
-  // };
+      const checkoutLink = createPaymentLink(lineItems);
+
+      await toast
+        .promise(checkoutLink, {
+          pending: "Checking out... 🙄",
+          success: "Redirecting. 👌",
+          error: "Something went wrong. 😱",
+        })
+        .then((checkoutLink) => {
+          if (checkoutLink.status) {
+            router.push(checkoutLink.paymentLink?.url ?? "");
+          } else {
+            console.error("Error creating payment link: ", checkoutLink.error);
+          }
+        });
+    } catch (error) {
+      console.error("Handle Checkout Error: ", error);
+      throw Error;
+    }
+  };
 
   return (
     <section className="relative py-10">
@@ -230,7 +247,7 @@ export default function ProductDetails({
                   <Heart />
                 </button> */}
                 <button
-                  // onClick={handleCheckout}
+                  onClick={handleCheckout}
                   className="text-center w-full px-5 py-4 rounded-[100px] bg-indigo-600 flex items-center justify-center font-semibold text-lg text-white shadow-sm transition-all duration-500 hover:bg-indigo-700 hover:shadow-indigo-400"
                 >
                   Buy Now
