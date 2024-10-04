@@ -1,66 +1,46 @@
-// "use server";
+"use server";
 
+import squareClient from "@/lib/square";
+import { OrderLineItem } from "square";
 
-// interface validateQuantityParams {
-//   token: string;
-//   lineItemId: string;
-//   data: { amount: number; variant_id?: string };
-// }
+const locationId = process.env.SQUARE_SANDBOX_LOCATION_ID ?? "";
+const redirectUrl =
+  process.env.NODE_ENV === "development"
+    ? process.env.DEVELOPMENT_BASE_URL
+    : process.env.PRODUCTION_BASE_URL;
 
-// export const generateCartCheckoutToken = async (
-//   product: string,
-//   checkoutType: "cart" | "product_id" | "permalink"
-// ) => {
-//   try {
-//     const token = commerce.checkout.generateToken(product, {
-//       type: checkoutType,
-//     });
+export const createPaymentLink = async (lineItems: OrderLineItem[]) => {
+  if (!locationId) {
+    return { status: false, error: "Location ID not found" };
+  }
 
-//     return token;
-//   } catch (error) {
-//     console.error("Error Checking Out: ", error);
-//     throw error;
-//   }
-// };
+  try {
+    const response = await squareClient.checkoutApi.createPaymentLink({
+      order: {
+        locationId,
+        lineItems,
+      },
+      checkoutOptions: {
+        redirectUrl,
+        askForShippingAddress: true,
+        acceptedPaymentMethods: {
+          applePay: true,
+          googlePay: true,
+          cashAppPay: true,
+          afterpayClearpay: true,
+        },
+      },
+    });
 
-// export const validateCheckoutToken = async (token: string) => {
-//   try {
-//     const checkout = await commerce.checkout.getToken(token);
+    console.log("Payment Link: ", response.result.paymentLink);
 
-//     return { valid: true, checkout };
-//   } catch (error) {
-//     return { valid: false, checkout: null };
-//   }
-// };
-
-// export const validateQuantity = async ({
-//   token,
-//   lineItemId,
-//   data,
-// }: validateQuantityParams) => {
-//   try {
-//     const isQuantityValid = await commerce.checkout.checkQuantity(
-//       token,
-//       lineItemId,
-//       data
-//     );
-
-//     return { valid: true, isQuantityValid };
-//   } catch (error) {
-//     return { valid: false, isQuantityValid: null };
-//   }
-// };
-
-// export const captureOrder = async (
-//   token: string,
-//   checkoutCapture: CheckoutCapture
-// ) => {
-//   try {
-//     const order = await commerce.checkout.capture(token, checkoutCapture);
-
-//     return order;
-//   } catch (error) {
-//     console.error("Error capturing order: ", error);
-//     throw error;
-//   }
-// };
+    return {
+      status: true,
+      error: false,
+      paymentLink: response.result.paymentLink,
+    };
+  } catch (error) {
+    console.error("Error creating payment link: ", error);
+    return { status: false, error: error as any };
+  }
+};
