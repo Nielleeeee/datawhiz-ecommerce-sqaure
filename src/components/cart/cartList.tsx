@@ -103,7 +103,7 @@ export default function CartItems() {
       }
     } catch (error) {
       console.error("Handle Checkout Error: ", error);
-      throw Error;
+      throw new Error("Checkout failed");
     }
   };
 
