@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 const navigationList = [
   { label: "Home", path: "/" },
   { label: "Shops", path: "/shop" },
+  { label: "Subscription", path: "/subscription" },
 ];
 
 export default function Header() {
