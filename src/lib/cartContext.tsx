@@ -13,8 +13,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (cart) {
       setCartCookie(cart);
     }
-
-    console.log(cart);
   }, [cart]);
 
   const addToCart = (newItem: CartItem) => {
