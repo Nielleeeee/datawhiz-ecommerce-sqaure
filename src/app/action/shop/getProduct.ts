@@ -7,7 +7,17 @@ export const getProducts = async () => {
   try {
     const { catalogApi, inventoryApi } = squareClient;
 
-    const products = await catalogApi.listCatalog("", "ITEM");
+    const products = await catalogApi.searchCatalogObjects(
+      {
+        objectTypes: ["ITEM"],
+        query: {
+          exactQuery: {
+            attributeName: "category_id",
+            attributeValue: "ONHY25K2OS6VW72757GOKYSR", // Make this one dynamic
+          },
+        },
+      }
+    );
 
     if (
       products.result &&
