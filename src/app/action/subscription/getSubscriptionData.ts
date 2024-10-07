@@ -1,29 +1,34 @@
 import squareClient from "@/lib/square";
 
 export const getSubscriptionData = async () => {
+  const { catalogApi } = squareClient;
+
   try {
-    const allSubscription = await squareClient.catalogApi.listCatalog(
+    const subscriptionData = await catalogApi.listCatalog(
       "",
       "SUBSCRIPTION_PLAN"
     );
 
-    const subscriptionItemID = allSubscription.result.objects?.map(
-      (subscriptionItem) => {
-        return subscriptionItem.subscriptionPlanData?.eligibleItemIds?.[0];
-      }
-    );
-
-    const subscriptionItems = Array.from(
+    const subscriptionItemID = Array.from(
       new Set(
-        allSubscription.result.objects?.map(
+        subscriptionData.result.objects?.map(
           (subscriptionItem) =>
-            subscriptionItem.subscriptionPlanData?.eligibleItemIds?.[0]
+            subscriptionItem.subscriptionPlanData
+              ?.eligibleItemIds?.[0] as string
         )
       )
     );
 
-    console.log("Subscription Items: ", subscriptionItems);
-    return { status: true, error: false };
+    const subscriptionItems = await catalogApi.batchRetrieveCatalogObjects({
+      objectIds: subscriptionItemID,
+    });
+    
+    return {
+      status: true,
+      error: false,
+      subscriptionItems: subscriptionItems.result.objects,
+      subscriptionData: subscriptionData.result.objects,
+    };
   } catch (error) {
     console.log("Error fetching subscription data: ", error);
     return { status: false, error: error as any };
