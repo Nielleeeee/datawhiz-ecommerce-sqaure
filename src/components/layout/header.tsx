@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-// import { useCart } from "@/lib/cartContext";
+import dynamic from "next/dynamic";
+
+const CartCount = dynamic(() => import("@/components/cart/cartCount"), { ssr: false });
 
 const navigationList = [
   { label: "Home", path: "/" },
@@ -13,7 +15,6 @@ const navigationList = [
 ];
 
 export default function Header() {
-  // const { cart } = useCart();
   const [isOpen, setIsOpen] = useState(false);
 
   const pathname = usePathname();
@@ -93,13 +94,7 @@ export default function Header() {
                   />
                 </svg>
 
-                {/* {cart &&
-                  cart.total_unique_items !== undefined &&
-                  cart.total_unique_items > 0 && (
-                    <span className="absolute -top-2 -left-4 px-2 py-1 text-xs text-white bg-blue-500 rounded-full">
-                      {cart.total_unique_items}
-                    </span>
-                  )} */}
+                <CartCount />
               </Link>
             </div>
 
@@ -140,13 +135,7 @@ export default function Header() {
                       />
                     </svg>
 
-                    {/* {cart &&
-                      cart.total_unique_items !== undefined &&
-                      cart.total_unique_items > 0 && (
-                        <span className="absolute -top-2 -left-4 px-2 py-1 text-xs text-white bg-blue-500 rounded-full">
-                          {cart.total_unique_items}
-                        </span>
-                      )} */}
+                    <CartCount />
                   </Link>
                 </div>
               </div>
