@@ -34,3 +34,15 @@ interface CartContextType {
 interface InventoryCount {
   [key: string]: number | undefined;
 }
+
+interface SubscriptionCatalogObject extends CatalogObject {
+  discount?: {
+    discountData?: {
+      amountMoney?: {
+        amount: number;
+        currency: string;
+      };
+      percentage?: number;
+    };
+  };
+}
