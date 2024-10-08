@@ -4,6 +4,8 @@ import SubscriptionCards from "@/components/subscription/subscriptionCards";
 export default async function Subscription() {
   const { subscriptionItems, subscriptionData } = await getSubscriptionData();
 
+  console.log(subscriptionData);
+
   return (
     <main className="bg-white pt-20 lg:pt-[120px] pb-12 lg:pb-[90px] relative z-20 overflow-hidden">
       <section className="container mx-auto">
