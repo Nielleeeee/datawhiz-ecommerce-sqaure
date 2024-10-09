@@ -61,7 +61,7 @@ export default function SubscriptionCards({
 
   const SubscriptionItemCard = () => {
     return (
-      <div className="flex flex-wrap gap-4 justify-center">
+      <div className="w-full flex flex-wrap gap-4 justify-center items-center px-4">
         {subscriptionItems.map((subscription: CatalogObject, index) => {
           const { itemData } = subscription;
 
@@ -74,9 +74,11 @@ export default function SubscriptionCards({
             : "Price not available";
 
           return (
-            <div key={index} className="w-full md:w-1/2 lg:w-1/3">
+            <div key={index} className="flex-1 min-w-[300px] max-w-[400px]">
               <div
                 className="
+                flex
+                flex-col
                bg-white
                rounded-xl
                relative
@@ -89,15 +91,15 @@ export default function SubscriptionCards({
                sm:p-12
                lg:py-10 lg:px-6
                xl:p-12
-               h-full
-               max-h-[600px]
+               h-[540px]
+               shadow-sm
                "
               >
                 <span className="text-primary font-semibold text-lg block mb-4">
                   {itemData?.name}
                 </span>
 
-                <h2 className="font-bold text-dark mb-5 text-[42px]">
+                <h2 className="font-bold text-dark mb-5 text-4xl lg:text-5xl">
                   $ {price}
                   <span className="text-base text-body-color font-medium">
                     / {isYearly ? "year" : "month"}
@@ -112,7 +114,7 @@ export default function SubscriptionCards({
 
                 <Link
                   href="#"
-                  className={`w-full block text-base font-semibold border border-blue-500 rounded-md text-center p-4 transition ${
+                  className={`w-full block mt-auto text-base font-semibold border border-blue-500 rounded-md text-center p-4 transition ${
                     (index + 1) % 2 === 0
                       ? "text-white bg-blue-500 hover:bg-opacity-90"
                       : "text-black hover:text-white hover:bg-blue-500"
