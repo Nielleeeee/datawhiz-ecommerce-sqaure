@@ -7,6 +7,13 @@ import { CatalogObject } from "square";
 import parse from "html-react-parser";
 import { SubscriptionCatalogObject } from "../../../type";
 
+interface PricesObject {
+  [key: string]: {
+    monthly: { price: number; id: string };
+    yearly: { price: number; id: string };
+  };
+}
+
 export default function SubscriptionCards({
   subscriptionItems,
   subscriptionData,
@@ -14,15 +21,11 @@ export default function SubscriptionCards({
   subscriptionItems: CatalogObject[];
   subscriptionData: SubscriptionCatalogObject[];
 }) {
-  const [prices, setPrices] = useState<{
-    [key: string]: { monthly: number; yearly: number };
-  }>({});
+  const [prices, setPrices] = useState<PricesObject>({});
   const [isYearly, setIsYearly] = useState<boolean>(false);
 
   useEffect(() => {
-    const initialPrices: {
-      [key: string]: { monthly: number; yearly: number };
-    } = {};
+    const initialPrices: PricesObject = {};
 
     subscriptionItems.forEach((subscription) => {
       const priceData =
@@ -31,28 +34,57 @@ export default function SubscriptionCards({
       const monthlyPrice =
         priceData?.amount != null ? Number(priceData.amount) / 100 : 0;
 
-      const matchingSubscription = subscriptionData.find((subData) => {
-        return (
-          subData.subscriptionPlanData?.eligibleItemIds?.includes(
-            subscription.id
-          ) && subData.discount !== null
+      const matchingSubscriptions = subscriptionData.filter((subData) => {
+        return subData.subscriptionPlanData?.eligibleItemIds?.includes(
+          subscription.id
         );
       });
 
+      // Find the yearly and monthly plans from the matching subscriptions
+      const monthlyPlan = matchingSubscriptions.find((subData) =>
+        subData.subscriptionPlanData?.subscriptionPlanVariations?.some(
+          (variation) =>
+            variation.subscriptionPlanVariationData?.phases[0].cadence ===
+            "MONTHLY"
+        )
+      );
+
+      const yearlyPlan = matchingSubscriptions.find((subData) =>
+        subData.subscriptionPlanData?.subscriptionPlanVariations?.some(
+          (variation) =>
+            variation.subscriptionPlanVariationData?.phases[0].cadence ===
+            "ANNUAL"
+        )
+      );
+
+      // Calculate discount if it exists in the yearly plan
       let fixedDiscount =
-        Number(
-          matchingSubscription?.discount?.discountData?.amountMoney?.amount
-        ) / 100 || 0;
+        Number(yearlyPlan?.discount?.discountData?.amountMoney?.amount) / 100 ||
+        0;
 
       const yearlyPrice = monthlyPrice * 12 - fixedDiscount;
 
+      const monthlyPlanId =
+        monthlyPlan?.subscriptionPlanData?.subscriptionPlanVariations?.[0].id!;
+
+      const yearlyPlanId =
+        yearlyPlan?.subscriptionPlanData?.subscriptionPlanVariations?.[0].id!;
+
       initialPrices[subscription.id] = {
-        monthly: monthlyPrice,
-        yearly: yearlyPrice,
+        monthly: {
+          id: monthlyPlanId,
+          price: monthlyPrice,
+        },
+        yearly: {
+          id: yearlyPlanId,
+          price: yearlyPrice,
+        },
       };
     });
 
     setPrices(initialPrices);
+
+    console.log(initialPrices);
   }, [subscriptionData, subscriptionItems]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,9 +101,15 @@ export default function SubscriptionCards({
 
           const price = priceData
             ? isYearly
-              ? priceData.yearly
-              : priceData.monthly
+              ? priceData.yearly.price
+              : priceData.monthly.price
             : "Price not available";
+
+          const subscriptionID = priceData
+            ? isYearly
+              ? priceData.yearly.id
+              : priceData.monthly.id
+            : "";
 
           return (
             <div key={index} className="flex-1 min-w-[300px] max-w-[400px]">
@@ -113,7 +151,7 @@ export default function SubscriptionCards({
                 )}
 
                 <Link
-                  href="#"
+                  href={`/checkout?subscriptionID=${subscriptionID}`} //Instead of subscription item id we put the subscripition data id
                   className={`w-full block mt-auto text-base font-semibold border border-blue-500 rounded-md text-center p-4 transition ${
                     (index + 1) % 2 === 0
                       ? "text-white bg-blue-500 hover:bg-opacity-90"
