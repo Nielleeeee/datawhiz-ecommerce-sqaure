@@ -3,9 +3,8 @@
 import Image from "next/image";
 import parse from "html-react-parser";
 import { useState } from "react";
-import { Minus, Add, Cart, Heart } from "@/components/ui/svg";
+import { Minus, Add, Cart } from "@/components/ui/svg";
 import { toast } from "react-toastify";
-import Link from "next/link";
 import { createPaymentLink } from "@/app/action/checkout/checkout";
 import { useRouter } from "next/navigation";
 import {
