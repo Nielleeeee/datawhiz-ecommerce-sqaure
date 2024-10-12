@@ -46,3 +46,18 @@ interface SubscriptionCatalogObject extends CatalogObject {
     };
   };
 }
+
+interface SubscriptionCheckoutFormProps {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  email: string;
+  gender: string;
+  birthday: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  consent: boolean;
+}
