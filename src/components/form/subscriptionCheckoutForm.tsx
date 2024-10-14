@@ -9,6 +9,7 @@ import { State, City } from "country-state-city";
 import Selector from "@/components/ui/selector";
 import { useEffect, useState } from "react";
 import { ICity } from "country-state-city";
+import Link from "next/link";
 
 export default function SubscriptionCheckoutForm({
   subscriptionID,
@@ -34,7 +35,7 @@ export default function SubscriptionCheckoutForm({
     addressLine1: Yup.string().required("Address Line 1 is required"),
     addressLine2: Yup.string(),
     state: Yup.string().required("State is required"),
-    city: Yup.string().required("City is required"),
+    city: Yup.string(),
     zipCode: Yup.string().required("Zip Code is required"),
     consent: Yup.boolean()
       .oneOf([true], "You must accept the terms and conditions")
@@ -75,7 +76,7 @@ export default function SubscriptionCheckoutForm({
     if (selectedState) {
       const citiesOfState = City.getCitiesOfState("US", selectedState);
       setCities(citiesOfState);
-  
+
       if (citiesOfState.length > 0) {
         setValue("city", citiesOfState[0].name);
       } else {
@@ -122,8 +123,16 @@ export default function SubscriptionCheckoutForm({
               type="text"
               id="lastName"
               {...register("lastName")}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.lastName ? "border-red-400 border-2" : "border-gray-400"
+              }`}
             />
+
+            {errors.lastName && (
+              <span className="text-red-500 text-xs tracking-tight">
+                {errors.lastName.message}
+              </span>
+            )}
           </div>
         </div>
         <div>
@@ -137,8 +146,15 @@ export default function SubscriptionCheckoutForm({
             type="email"
             id="email"
             {...register("email")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.email ? "border-red-400 border-2" : "border-gray-400"
+            }`}
           />
+          {errors.email && (
+            <span className="text-red-500 text-xs tracking-tight">
+              {errors.email.message}
+            </span>
+          )}
         </div>
         <div>
           <label
@@ -151,8 +167,15 @@ export default function SubscriptionCheckoutForm({
             type="tel"
             id="phone"
             {...register("phoneNumber")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.phoneNumber ? "border-red-400 border-2" : "border-gray-400"
+            }`}
           />
+          {errors.phoneNumber && (
+            <span className="text-red-500 text-xs tracking-tight">
+              {errors.phoneNumber.message}
+            </span>
+          )}
         </div>
         <div>
           <span className="block text-sm font-medium text-gray-700 mb-1">
@@ -171,6 +194,11 @@ export default function SubscriptionCheckoutForm({
               </label>
             ))}
           </div>
+          {errors.gender && (
+            <span className="text-red-500 text-xs tracking-tight">
+              {errors.gender.message}
+            </span>
+          )}
         </div>
         <div>
           <label
@@ -183,8 +211,15 @@ export default function SubscriptionCheckoutForm({
             type="date"
             id="birthday"
             {...register("birthday")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.birthday ? "border-red-400 border-2" : "border-gray-400"
+            }`}
           />
+          {errors.birthday && (
+            <span className="text-red-500 text-xs tracking-tight">
+              {errors.birthday.message}
+            </span>
+          )}
         </div>
       </div>
 
@@ -203,8 +238,17 @@ export default function SubscriptionCheckoutForm({
             type="text"
             id="addressLine1"
             {...register("addressLine1")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.addressLine1
+                ? "border-red-400 border-2"
+                : "border-gray-400"
+            }`}
           />
+          {errors.addressLine1 && (
+            <span className="text-red-500 text-xs tracking-tight">
+              {errors.addressLine1.message}
+            </span>
+          )}
         </div>
         <div>
           <label
@@ -217,8 +261,17 @@ export default function SubscriptionCheckoutForm({
             type="text"
             id="addressLine2"
             {...register("addressLine2")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.addressLine2
+                ? "border-red-400 border-2"
+                : "border-gray-400"
+            }`}
           />
+          {errors.addressLine2 && (
+            <span className="text-red-500 text-xs tracking-tight">
+              {errors.addressLine2.message}
+            </span>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -235,6 +288,11 @@ export default function SubscriptionCheckoutForm({
               data={allStateData}
               name="state"
             />
+            {errors.state && (
+              <span className="text-red-500 text-xs tracking-tight">
+                {errors.state.message}
+              </span>
+            )}
           </div>
           <div>
             <label
@@ -244,6 +302,11 @@ export default function SubscriptionCheckoutForm({
               City*
             </label>
             <Selector setValue={setValue} data={cities} name="city" />
+            {errors.city && (
+              <span className="text-red-500 text-xs tracking-tight">
+                {errors.city.message}
+              </span>
+            )}
           </div>
         </div>
         <div>
@@ -257,8 +320,40 @@ export default function SubscriptionCheckoutForm({
             type="text"
             id="zipCode"
             {...register("zipCode")}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.zipCode ? "border-red-400 border-2" : "border-gray-400"
+            }`}
           />
+          {errors.zipCode && (
+            <span className="text-red-500 text-xs tracking-tight">
+              {errors.zipCode.message}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-4 justify-center items-center">
+          <input
+            type="checkbox"
+            {...register("consent")}
+            id="consent"
+            className="h-6 w-6"
+          />
+
+          <label htmlFor="consent" className="sr-only">
+            consent
+          </label>
+
+          <span className="text-black text-sm w-full">
+            I agree to{" "}
+            <Link href={"#"} target="_blank" className="text-blue-500">
+              terms & condition
+            </Link>
+          </span>
+
+          {errors.consent && (
+            <span className="text-red-500 text-sm col-span-4">
+              {errors.consent.message}
+            </span>
+          )}
         </div>
       </div>
 
