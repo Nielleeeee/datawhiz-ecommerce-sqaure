@@ -1,16 +1,27 @@
 "use client";
 
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, set } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { SubscriptionCheckoutFormProps } from "../../../type";
+import { State, City } from "country-state-city";
+import Selector from "@/components/ui/selector";
+import { useEffect, useState } from "react";
+import { ICity } from "country-state-city";
 
 export default function SubscriptionCheckoutForm({
   subscriptionID,
 }: {
   subscriptionID: string;
 }) {
+  const allStateData = State.getStatesOfCountry("US");
+
+  const [cities, setCities] = useState<ICity[]>([]);
+  const [selectedState, setSelectedState] = useState<string>(
+    allStateData[0].isoCode
+  );
+
   const validationSchema = Yup.object({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
@@ -22,8 +33,8 @@ export default function SubscriptionCheckoutForm({
     birthday: Yup.string().required("Birthday is required"),
     addressLine1: Yup.string().required("Address Line 1 is required"),
     addressLine2: Yup.string(),
-    city: Yup.string().required("City is required"),
     state: Yup.string().required("State is required"),
+    city: Yup.string().required("City is required"),
     zipCode: Yup.string().required("Zip Code is required"),
     consent: Yup.boolean()
       .oneOf([true], "You must accept the terms and conditions")
@@ -33,6 +44,7 @@ export default function SubscriptionCheckoutForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<SubscriptionCheckoutFormProps>({
@@ -59,6 +71,19 @@ export default function SubscriptionCheckoutForm({
     }
   };
 
+  useEffect(() => {
+    if (selectedState) {
+      const citiesOfState = City.getCitiesOfState("US", selectedState);
+      setCities(citiesOfState);
+  
+      if (citiesOfState.length > 0) {
+        setValue("city", citiesOfState[0].name);
+      } else {
+        setValue("city", "");
+      }
+    }
+  }, [selectedState, setValue]);
+
   return (
     <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-4">
@@ -75,9 +100,16 @@ export default function SubscriptionCheckoutForm({
               type="text"
               id="firstName"
               {...register("firstName")}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.firstName ? "border-red-400 border-2" : "border-gray-400"
+              }`}
             />
+
+            {errors.firstName && (
+              <span className="text-red-500 text-xs tracking-tight">
+                {errors.firstName.message}
+              </span>
+            )}
           </div>
           <div>
             <label
@@ -90,7 +122,6 @@ export default function SubscriptionCheckoutForm({
               type="text"
               id="lastName"
               {...register("lastName")}
-              required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -106,7 +137,6 @@ export default function SubscriptionCheckoutForm({
             type="email"
             id="email"
             {...register("email")}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -121,7 +151,6 @@ export default function SubscriptionCheckoutForm({
             type="tel"
             id="phone"
             {...register("phoneNumber")}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -137,7 +166,6 @@ export default function SubscriptionCheckoutForm({
                   {...register("gender")}
                   value={gender.toLowerCase()}
                   className="form-radio text-blue-600"
-                  required
                 />
                 <span className="ml-2">{gender}</span>
               </label>
@@ -155,7 +183,6 @@ export default function SubscriptionCheckoutForm({
             type="date"
             id="birthday"
             {...register("birthday")}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -176,7 +203,6 @@ export default function SubscriptionCheckoutForm({
             type="text"
             id="addressLine1"
             {...register("addressLine1")}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -197,37 +223,27 @@ export default function SubscriptionCheckoutForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label
-              htmlFor="city"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              City*
-            </label>
-            <input
-              type="text"
-              id="city"
-              {...register("city")}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label
               htmlFor="state"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
               State*
             </label>
-            <select
-              id="state"
-              {...register("state")}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+
+            <Selector
+              setSelectedCode={setSelectedState}
+              setValue={setValue}
+              data={allStateData}
+              name="state"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="city"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              <option value="">Select state</option>
-              <option value="AL">Alabama</option>
-              <option value="AK">Alaska</option>
-              {/* Add more states here */}
-            </select>
+              City*
+            </label>
+            <Selector setValue={setValue} data={cities} name="city" />
           </div>
         </div>
         <div>
@@ -241,7 +257,6 @@ export default function SubscriptionCheckoutForm({
             type="text"
             id="zipCode"
             {...register("zipCode")}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
