@@ -56,7 +56,7 @@ interface SubscriptionCheckoutFormProps {
   birthday: string;
   addressLine1: string;
   addressLine2?: string;
-  city: string;
+  city?: string;
   state: string;
   zipCode: string;
   consent: boolean;
