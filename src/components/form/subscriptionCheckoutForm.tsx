@@ -10,6 +10,7 @@ import Selector from "@/components/ui/selector";
 import { useEffect, useState } from "react";
 import { ICity } from "country-state-city";
 import Link from "next/link";
+import { checkoutSubscription } from "@/app/action/subscription/checkoutSubscription";
 
 export default function SubscriptionCheckoutForm({
   subscriptionID,
@@ -56,15 +57,13 @@ export default function SubscriptionCheckoutForm({
     data
   ) => {
     try {
-      console.log("Form Data: ", data);
-      // const response = submitContactForm(data);
+      const response = checkoutSubscription(subscriptionID, data);
 
-      // await toast
-      //   .promise(response, {
-      //     pending: "Sending contact form...",
-      //     success: "Contact form sent successfully.",
-      //     error: "Something went wrong.",
-      //   })
+      await toast.promise(response, {
+        pending: "Checking out subscription...",
+        success: "Subscription checked out successfully.",
+        error: "Something went wrong.",
+      });
     } catch (error) {
       console.error("An error occurred:", error);
     } finally {
