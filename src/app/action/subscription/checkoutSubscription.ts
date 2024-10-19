@@ -2,6 +2,7 @@
 
 import squareClient from "@/lib/square";
 import { SubscriptionCheckoutFormProps } from "../../../../type";
+import { bigint } from "square/dist/types/schema";
 
 const generateRandomKey = () => crypto.randomUUID();
 
@@ -72,17 +73,43 @@ const createUser = async ({
   }
 };
 
-// const createSubscriptionOrder = async () => {
-//   try {
-//     return
-//   } catch (error) {
-//     console.error("Something went wrong while creating subscription order: ", error);
-//     return
-//   }
-// }
+const createSubscriptionOrder = async (
+  customerId: string,
+  catalogObjectId: string
+) => {
+  try {
+    const idempotencyKey = generateRandomKey();
+    const locationId = process.env.SQUARE_SANDBOX_LOCATION_ID ?? "";
+
+    const response = await squareClient.ordersApi.createOrder({
+      order: {
+        locationId,
+        customerId,
+        lineItems: [
+          {
+            quantity: "1",
+            catalogObjectId,
+            itemType: "ITEM",
+          },
+        ],
+        state: "DRAFT",
+      },
+      idempotencyKey,
+    });
+
+    return response.result;
+  } catch (error) {
+    console.error(
+      "Something went wrong while creating subscription order: ",
+      error
+    );
+    return null;
+  }
+};
 
 export const checkoutSubscription = async (
   planVariationId: string,
+  subscriptionItemVariationId: string,
   formData: SubscriptionCheckoutFormProps
 ) => {
   try {
@@ -100,20 +127,31 @@ export const checkoutSubscription = async (
 
     const customerId = createdUser.customer.id;
 
+    const createOrder = await createSubscriptionOrder(
+      customerId,
+      subscriptionItemVariationId
+    );
+
+    const orderTemplateId = createOrder?.order?.id!;
+
     const checkoutSubscriptionResponse =
       await squareClient.subscriptionsApi.createSubscription({
         idempotencyKey,
         locationId,
         planVariationId,
         customerId,
-        // phases: [
-        //   {
-        //     ordinal: 0,
-        //     orderTemplateId: orderTemplateId, // Generated from createOrder
-        //     planPhaseUid: 'CGEKSJH4POVE6EHPUAXALGFD'
-        //   }
-        // ]
+        phases: [
+          {
+            ordinal: BigInt("0"),
+            orderTemplateId, // Generated from createOrder
+          },
+        ],
       });
+
+    console.log(
+      "Subscription checkout response: ",
+      checkoutSubscriptionResponse.result
+    );
 
     return {
       status: true,
