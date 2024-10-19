@@ -12,6 +12,7 @@ export default function Checkout() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isValid, setIsValid] = useState(false);
+  const [itemVariationId, setItemVariationId] = useState<string>("");
 
   const subscriptionID = searchParams.get("subscriptionID");
 
@@ -21,10 +22,13 @@ export default function Checkout() {
 
   useEffect(() => {
     async function checkSubscritionID() {
-      const { status } = await validateSubscriptionID(subscriptionID!);
+      const { status, itemVariationId } = await validateSubscriptionID(
+        subscriptionID!
+      );
 
-      if (status) {
+      if (status && itemVariationId) {
         setIsValid(true);
+        setItemVariationId(itemVariationId);
       } else {
         router.push("/404");
       }
@@ -50,7 +54,10 @@ export default function Checkout() {
             To get started, enter your contact information.
           </p>
 
-          <SubscriptionCheckoutForm subscriptionID={subscriptionID} />
+          <SubscriptionCheckoutForm
+            subscriptionID={subscriptionID}
+            itemVariationId={itemVariationId}
+          />
         </div>
       </section>
     </main>
