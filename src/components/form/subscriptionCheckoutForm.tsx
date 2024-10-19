@@ -14,8 +14,10 @@ import { checkoutSubscription } from "@/app/action/subscription/checkoutSubscrip
 
 export default function SubscriptionCheckoutForm({
   subscriptionID,
+  itemVariationId
 }: {
   subscriptionID: string;
+  itemVariationId: string;
 }) {
   const allStateData = State.getStatesOfCountry("US");
 
@@ -57,7 +59,11 @@ export default function SubscriptionCheckoutForm({
     data
   ) => {
     try {
-      const response = checkoutSubscription(subscriptionID, data);
+      const response = checkoutSubscription(
+        subscriptionID,
+        itemVariationId,
+        data
+      );
 
       await toast.promise(response, {
         pending: "Checking out subscription...",
@@ -341,7 +347,7 @@ export default function SubscriptionCheckoutForm({
             consent
           </label>
 
-          <span className="text-black text-sm w-full">
+          <span className="text-white text-sm w-full">
             I agree to{" "}
             <Link href={"#"} target="_blank" className="text-blue-500">
               terms & condition
