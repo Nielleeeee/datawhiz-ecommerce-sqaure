@@ -2,7 +2,6 @@
 
 import squareClient from "@/lib/square";
 import { SubscriptionCheckoutFormProps } from "../../../../type";
-import { bigint } from "square/dist/types/schema";
 
 const generateRandomKey = () => crypto.randomUUID();
 
@@ -37,8 +36,6 @@ const createUser = async ({
       phoneNumber: phoneNumber,
       birthday: birthday,
     });
-
-    console.log(createdUser.result);
 
     // Sample Response
     // {
