@@ -29,7 +29,7 @@ export default function SubscriptionCheckoutForm({
   const validationSchema = Yup.object({
     firstName: Yup.string().required("First Name is required"),
     lastName: Yup.string().required("Last Name is required"),
-    phoneNumber: Yup.string().required("Phone Number is required"),
+    phoneNumber: Yup.string(),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
@@ -347,7 +347,7 @@ export default function SubscriptionCheckoutForm({
             consent
           </label>
 
-          <span className="text-white text-sm w-full">
+          <span className="text-black text-sm w-full">
             I agree to{" "}
             <Link href={"#"} target="_blank" className="text-blue-500">
               terms & condition
