@@ -50,7 +50,7 @@ interface SubscriptionCatalogObject extends CatalogObject {
 interface SubscriptionCheckoutFormProps {
   firstName: string;
   lastName: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   email: string;
   gender: string;
   birthday: string;
