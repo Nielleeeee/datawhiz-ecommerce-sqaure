@@ -14,7 +14,7 @@ import { checkoutSubscription } from "@/app/action/subscription/checkoutSubscrip
 
 export default function SubscriptionCheckoutForm({
   subscriptionID,
-  itemVariationId
+  itemVariationId,
 }: {
   subscriptionID: string;
   itemVariationId: string;
@@ -59,13 +59,21 @@ export default function SubscriptionCheckoutForm({
     data
   ) => {
     try {
-      const response = checkoutSubscription(
-        subscriptionID,
-        itemVariationId,
-        data
-      );
+      const responsePromise = new Promise(async (resolve, reject) => {
+        const response = await checkoutSubscription(
+          subscriptionID,
+          itemVariationId,
+          data
+        );
 
-      await toast.promise(response, {
+        if (response.status) {
+          resolve(response);
+        } else {
+          reject(new Error(response.error as any));
+        }
+      });
+
+      await toast.promise(responsePromise, {
         pending: "Checking out subscription...",
         success: "Subscription checked out successfully.",
         error: "Something went wrong.",
