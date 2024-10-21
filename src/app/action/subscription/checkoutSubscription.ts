@@ -37,32 +37,6 @@ const createUser = async ({
       birthday: birthday,
     });
 
-    // Sample Response
-    // {
-    //   "customer": {
-    //     "id": "9CVXF6M34X0JHJN1CY5FAX6TBG",
-    //     "created_at": "2024-10-14T19:51:04.489Z",
-    //     "updated_at": "2024-10-14T19:51:04Z",
-    //     "given_name": "test",
-    //     "family_name": "email",
-    //     "email_address": "testemail@gmail.com",
-    //     "address": {
-    //       "address_line_1": "sample",
-    //       "address_line_2": "sample 2",
-    //       "locality": "Tampa",
-    //       "administrative_district_level_1": "Florida",
-    //       "postal_code": "1234",
-    //       "country": "US"
-    //     },
-    //     "preferences": {
-    //       "email_unsubscribed": false
-    //     },
-    //     "creation_source": "THIRD_PARTY",
-    //     "birthday": "2001-09-19",
-    //     "version": 0
-    //   }
-    // }
-
     return createdUser.result;
   } catch (error) {
     console.error("Something went wrong while creating user: ", error);
@@ -128,6 +102,13 @@ export const checkoutSubscription = async (
       customerId,
       subscriptionItemVariationId
     );
+
+    if (!createOrder) {
+      return {
+        status: false,
+        error: "Something went wrong while creating order.",
+      };
+    }
 
     const orderTemplateId = createOrder?.order?.id!;
 
