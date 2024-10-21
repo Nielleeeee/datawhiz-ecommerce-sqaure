@@ -27,9 +27,13 @@ export const validateSubscriptionID = async (subscriptionID: string) => {
     const itemVariationId =
       subscriptionItem.result.object?.itemData?.variations?.[0]!.id!;
 
-    return { status: true, itemVariationId };
+    const subscriptionPlanName =
+      subscriptionPlan.result.object?.subscriptionPlanData
+        ?.subscriptionPlanVariations?.[0].subscriptionPlanVariationData?.name as string;
+
+    return { status: true, itemVariationId, subscriptionPlanName };
   } catch (error) {
     console.error("Error validating subscription ID: ", error);
-    return { status: false, itemVariationId: null };
+    return { status: false, itemVariationId: null, subscriptionPlanName: null };
   }
 };
