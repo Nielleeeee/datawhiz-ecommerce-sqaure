@@ -48,7 +48,7 @@ export default function Checkout() {
   }
 
   return (
-    <main className="h-full flex flex-col items-center justify-center">
+    <main className="h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400">
       <section className="container mx-auto py-10">
         <div className="w-full max-w-2xl mx-auto bg-white p-8 rounded-md shadow-lg">
           <h1 className="text-2xl font-bold mb-2">Checkout {subscriptionPlanName}</h1>
