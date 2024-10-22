@@ -97,6 +97,7 @@ export const checkoutSubscription = async (
     }
 
     const customerId = createdUser.customer.id;
+    const customerEmail = createdUser.customer.emailAddress!;
 
     const createOrder = await createSubscriptionOrder(
       customerId,
@@ -135,12 +136,18 @@ export const checkoutSubscription = async (
       status: true,
       error: null,
       subscriptionData: checkoutSubscriptionResponse.result,
+      customerEmail,
     };
   } catch (error) {
     console.error(
       "Something went wrong while checking out subscription: ",
       error
     );
-    return { status: false, error: error };
+    return {
+      status: false,
+      error: error,
+      subscriptionData: null,
+      customerEmail: null,
+    };
   }
 };
