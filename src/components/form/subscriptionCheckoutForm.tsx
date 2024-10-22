@@ -73,11 +73,26 @@ export default function SubscriptionCheckoutForm({
         }
       });
 
-      await toast.promise(responsePromise, {
-        pending: "Checking out subscription...",
-        success: "Subscription checked out successfully.",
-        error: "Something went wrong.",
-      });
+      await toast.promise(
+        responsePromise,
+        {
+          pending: "Checking out subscription...",
+          success: {
+            render({ data }: { data: any }) {
+              const email = data?.customerEmail || "the email provided";
+              return `
+              🎉 Subscription checked out successfully! 
+              📧 An invoice has been sent to ${email}. 
+              Please check your inbox for further details regarding your subscription.
+            `;
+            },
+          },
+          error: "Something went wrong.",
+        },
+        {
+          autoClose: 5000,
+        }
+      );
     } catch (error) {
       console.error("An error occurred:", error);
     } finally {
@@ -174,7 +189,7 @@ export default function SubscriptionCheckoutForm({
             htmlFor="phone"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Phone Number*
+            Phone Number
           </label>
           <input
             type="tel"
