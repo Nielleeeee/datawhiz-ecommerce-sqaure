@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { ICity } from "country-state-city";
 import Link from "next/link";
 import { checkoutSubscription } from "@/app/action/subscription/checkoutSubscription";
+import { useRouter } from "next/navigation";
 
 export default function SubscriptionCheckoutForm({
   subscriptionID,
@@ -19,6 +20,8 @@ export default function SubscriptionCheckoutForm({
   subscriptionID: string;
   itemVariationId: string;
 }) {
+  const router = useRouter();
+  const POPUPTIMER = 5000;
   const allStateData = State.getStatesOfCountry("US");
 
   const [cities, setCities] = useState<ICity[]>([]);
@@ -81,16 +84,27 @@ export default function SubscriptionCheckoutForm({
             render({ data }: { data: any }) {
               const email = data?.customerEmail || "the email provided";
               return `
-              🎉 Subscription checked out successfully! 
-              📧 An invoice has been sent to ${email}. 
-              Please check your inbox for further details regarding your subscription.
-            `;
+                🎉 Subscription checked out successfully!\n
+                📧 An invoice has been sent to ${email}.\n
+                Please check your inbox for further details regarding your subscription.
+              `;
             },
           },
           error: "Something went wrong.",
         },
         {
-          autoClose: 5000,
+          autoClose: POPUPTIMER,
+          onClose: () => {
+            responsePromise
+              .then((response: any) => {
+                if (response?.status) {
+                  router.push("/subscription");
+                }
+              })
+              .catch((error) => {
+                console.error("An error occurred during redirection:", error);
+              });
+          },
         }
       );
     } catch (error) {
